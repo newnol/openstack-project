@@ -1,0 +1,25 @@
+# Secrets and local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*openrc*
+clouds.yaml
+secure.yaml
+
+# Real DevStack configuration contains passwords
+devstack/local.conf
+
+# Python and editor artifacts
+__pycache__/
+*.py[cod]
+.DS_Store
+.vscode/
+.idea/
+
+# Generated archives and temporary files
+*.zip
+*.tar
+*.tar.gz
+*.tmp

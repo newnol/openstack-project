@@ -1,0 +1,30 @@
+[[local|localrc]]
+# OpenStack 2026.1 (DevStack stable/2026.1), single-node lab on Proxmox.
+HOST_IP=CHANGE_ME_HOST_IP
+SERVICE_HOST=$HOST_IP
+
+# Use an alphanumeric lab password; special characters can break DevStack services.
+ADMIN_PASSWORD=CHANGE_ME_ALPHANUMERIC
+DATABASE_PASSWORD=$ADMIN_PASSWORD
+RABBIT_PASSWORD=$ADMIN_PASSWORD
+SERVICE_PASSWORD=$ADMIN_PASSWORD
+
+# Use KVM when Proxmox exposes nested virtualization and /dev/kvm.
+LIBVIRT_TYPE=kvm
+API_WORKERS=2
+
+# Swift is disabled by default.
+enable_service s-proxy s-object s-container s-account
+SWIFT_REPLICAS=1
+SWIFT_LOOPBACK_DISK_SIZE=4G
+
+# Heat is a plugin and is not enabled by default.
+enable_plugin heat https://opendev.org/openstack/heat stable/2026.1
+enable_plugin heat-dashboard https://opendev.org/openstack/heat-dashboard stable/2026.1
+
+LOGFILE=/opt/stack/logs/stack.sh.log
+LOG_COLOR=False
+
+[[post-config|$NOVA_CONF]]
+[libvirt]
+virt_type = kvm

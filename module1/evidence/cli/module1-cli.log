@@ -1,0 +1,264 @@
+Module 1 CLI evidence generated at 2026-08-17T10:41:22+00:00
+
+$ openstack openstack token issue
++------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Field      | Value                                                                                                                                                                                   |
++------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| expires    | 2026-08-17T11:41:23+0000                                                                                                                                                                |
+| id         | gAAAAABqguVTlSRXj0LA6uYcgdiqNIf7Oq6uA672aLVXeST5Yz6fvLO437PHp5FZSrnHJrM1xakEGLqmSWpX8QCD0Bd37HMzJHSsN4--O9nsCZT3MGD-bdeB0Gb27Rb8rnPuLentIOTtzhcZtALus_Vt_TFXpaal_YweqtphbaYy5C5YpkKXiZw |
+| project_id | 584ac8167bd14822afc4cd874345ddce                                                                                                                                                        |
+| user_id    | db816ecdf1524664876db0f82b6b09bb                                                                                                                                                        |
++------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+$ openstack-service-list openstack service list
++----------------------------------+-------------+----------------+
+| ID                               | Name        | Type           |
++----------------------------------+-------------+----------------+
+| 090668fc958a4885bc6cca649629b184 | cinder      | block-storage  |
+| 3056fdce4326423285e3a404976b9aa9 | neutron     | network        |
+| 490c667a24f34b38ae935462f33f789a | heat-cfn    | cloudformation |
+| 6de4163e6adb4b2485489ee9a76a2a9d | nova        | compute        |
+| 9935104a9d434207b1bba83a95e80b5f | nova_legacy | compute_legacy |
+| d6813c92d1b3488d81ca09a6772df4bf | glance      | image          |
+| dbd47062a92b46719614faa7dd687d18 | keystone    | identity       |
+| dbf0005f054f46c28ed979dc2cd4d542 | heat        | orchestration  |
+| e6a47a60cda14d1c99aac26154090fd0 | swift       | object-store   |
+| fbf0dfa27bf3437e9169b87a8ff738c0 | placement   | placement      |
++----------------------------------+-------------+----------------+
+
+$ openstack-endpoint-list openstack endpoint list
++----------------------------------+-----------+--------------+----------------+---------+-----------+-------------------------------------------------+
+| ID                               | Region    | Service Name | Service Type   | Enabled | Interface | URL                                             |
++----------------------------------+-----------+--------------+----------------+---------+-----------+-------------------------------------------------+
+| 2150cb55d68e4ca780fa3aa19db0e927 | RegionOne | placement    | placement      | True    | public    | http://192.168.2.10/placement                   |
+| 277f02e201c243c3b2e1bf35e757c514 | RegionOne | cinder       | block-storage  | True    | public    | http://192.168.2.10/volume/v3                   |
+| 34907e56d7a34191b4bbdb4263564f98 | RegionOne | swift        | object-store   | True    | admin     | http://192.168.2.10:8080                        |
+| 3997ff0e32f74371aa0cc44422f326b5 | RegionOne | heat         | orchestration  | True    | public    | http://192.168.2.10/heat-api/v1/$(project_id)s  |
+| 49dfd5b407524162962293eacba5830d | RegionOne | swift        | object-store   | True    | public    | http://192.168.2.10:8080/v1/AUTH_$(project_id)s |
+| 4c60226fb94748c1b7facd71088b6cdf | RegionOne | nova_legacy  | compute_legacy | True    | public    | http://192.168.2.10/compute/v2/$(project_id)s   |
+| aa454a8ec4d34fde8297b460ba7741a7 | RegionOne | keystone     | identity       | True    | public    | http://192.168.2.10/identity                    |
+| c1950b1cb9644d858c75b2572ab094a4 | RegionOne | nova         | compute        | True    | public    | http://192.168.2.10/compute/v2.1                |
+| c656fa7aba0c44d2af501a327023752e | RegionOne | heat-cfn     | cloudformation | True    | public    | http://192.168.2.10/heat-api-cfn/v1             |
+| d3c1d107de714cbc8140e7e2c50a6941 | RegionOne | glance       | image          | True    | public    | http://192.168.2.10/image                       |
+| eaaedc402bc24007b013e6412af2fcea | RegionOne | neutron      | network        | True    | public    | http://192.168.2.10/networking                  |
++----------------------------------+-----------+--------------+----------------+---------+-----------+-------------------------------------------------+
+
+$ compute-service-list openstack compute service list
++--------------------------------------+----------------+-----------+----------+---------+-------+----------------------------+
+| ID                                   | Binary         | Host      | Zone     | Status  | State | Updated At                 |
++--------------------------------------+----------------+-----------+----------+---------+-------+----------------------------+
+| 274e6df5-3dce-4748-b965-4461384348a4 | nova-scheduler | openstack | internal | enabled | up    | 2026-08-17T10:40:47.000000 |
+| 2fdfd73e-bf05-4325-a90e-162969a69d98 | nova-conductor | openstack | internal | enabled | up    | 2026-08-17T10:40:50.000000 |
+| 77b09bd7-5f7f-4e91-927a-5e7cbfb14bf8 | nova-conductor | openstack | internal | enabled | up    | 2026-08-17T10:41:21.000000 |
+| 1bdbbee2-cad3-4779-b958-14457436eace | nova-compute   | openstack | nova     | enabled | up    | 2026-08-17T10:41:12.000000 |
++--------------------------------------+----------------+-----------+----------+---------+-------+----------------------------+
+
+$ hypervisor-list openstack hypervisor list
++--------------------------------------+---------------------+-----------------+--------------+-------+
+| ID                                   | Hypervisor Hostname | Hypervisor Type | Host IP      | State |
++--------------------------------------+---------------------+-----------------+--------------+-------+
+| 0b0fe0cc-efbf-4e8d-9b76-a3de88faa6bb | openstack           | QEMU            | 192.168.2.10 | up    |
++--------------------------------------+---------------------+-----------------+--------------+-------+
+
+$ image-list openstack image list
++--------------------------------------+---------------------------------+--------+
+| ID                                   | Name                            | Status |
++--------------------------------------+---------------------------------+--------+
+| b032298a-111c-4761-a858-f190a0a734aa | Fedora-Cloud-Base-37-1.7.x86_64 | active |
+| 7258d253-10bb-447a-870c-fbd5f55cbe60 | cirros-0.6.3-x86_64-disk        | active |
++--------------------------------------+---------------------------------+--------+
+
+$ flavor-list openstack flavor list
++--------------------------------------+---------------+-------+------+-----------+-------+-----------+
+| ID                                   | Name          |   RAM | Disk | Ephemeral | VCPUs | Is Public |
++--------------------------------------+---------------+-------+------+-----------+-------+-----------+
+| 1                                    | m1.tiny       |   512 |    1 |         0 |     1 | True      |
+| 2                                    | m1.small      |  2048 |   20 |         0 |     1 | True      |
+| 3                                    | m1.medium     |  4096 |   40 |         0 |     2 | True      |
+| 4                                    | m1.large      |  8192 |   80 |         0 |     4 | True      |
+| 42                                   | m1.nano       |   192 |    1 |         0 |     1 | True      |
+| 5                                    | m1.xlarge     | 16384 |  160 |         0 |     8 | True      |
+| 84                                   | m1.micro      |   256 |    1 |         0 |     1 | True      |
+| c1                                   | cirros256     |   256 |    1 |         0 |     1 | True      |
+| d1                                   | ds512M        |   512 |    5 |         0 |     1 | True      |
+| d2                                   | ds1G          |  1024 |   10 |         0 |     1 | True      |
+| d3                                   | ds2G          |  2048 |   10 |         0 |     2 | True      |
+| d4                                   | ds4G          |  4096 |   20 |         0 |     4 | True      |
+| e281b443-c3e8-4e95-beae-436a67325b5e | m1.heat_int   |  1024 |   10 |         0 |     2 | True      |
+| e44f2841-43d8-496f-a018-0d40a5aa47c0 | m1.heat_micro |   128 |    1 |         0 |     1 | True      |
++--------------------------------------+---------------+-------+------+-----------+-------+-----------+
+
+$ keypair-list openstack keypair list
+
+
+$ security-group-list openstack security group list
++--------------------------------------+---------+------------------------+----------------------------------+------+--------+
+| ID                                   | Name    | Description            | Project                          | Tags | Shared |
++--------------------------------------+---------+------------------------+----------------------------------+------+--------+
+| 9dcb9a89-00bb-48c9-b8b2-c00079bac755 | default | Default security group | 584ac8167bd14822afc4cd874345ddce | []   | False  |
+| f0da662e-dfcb-4739-9b4b-364f2e6b2c72 | default | Default security group | 7f5efe0f910b419380129a01b4d8ef2e | []   | False  |
++--------------------------------------+---------+------------------------+----------------------------------+------+--------+
+
+$ network-list openstack network list
++--------------------------------------+----------+----------------------------------------------------------------------------+
+| ID                                   | Name     | Subnets                                                                    |
++--------------------------------------+----------+----------------------------------------------------------------------------+
+| 2e287123-4338-4539-968a-b9bed7aca089 | shared   | 360c4b60-738e-4993-98ba-e4f5772dccd0                                       |
+| 4ec48ff0-20f3-4d39-a290-cfdcd75dcfee | public   | 4c2e7eb9-5a3c-4cbb-a360-0e6da7efd701, 5c6030f6-9b02-4ac7-8f18-f588be51a682 |
+| 64cabd5a-963c-464b-991e-c7e254643b7a | private  | 6658aaab-d6ee-43fc-b4f9-a512d0ba2df7, 72b451f1-30b5-4ee2-a23c-26e7accbb71c |
+| c3a43981-1b8d-4dd2-bd6b-622959774cd8 | heat-net | c004fc77-2cdc-4530-9532-f5594766750f                                       |
++--------------------------------------+----------+----------------------------------------------------------------------------+
+
+$ subnet-list openstack subnet list
++--------------------------------------+---------------------+--------------------------------------+---------------------+
+| ID                                   | Name                | Network                              | Subnet              |
++--------------------------------------+---------------------+--------------------------------------+---------------------+
+| 360c4b60-738e-4993-98ba-e4f5772dccd0 | shared-subnet       | 2e287123-4338-4539-968a-b9bed7aca089 | 192.168.233.0/24    |
+| 4c2e7eb9-5a3c-4cbb-a360-0e6da7efd701 | ipv6-public-subnet  | 4ec48ff0-20f3-4d39-a290-cfdcd75dcfee | 2001:db8::/64       |
+| 5c6030f6-9b02-4ac7-8f18-f588be51a682 | public-subnet       | 4ec48ff0-20f3-4d39-a290-cfdcd75dcfee | 172.24.4.0/24       |
+| 6658aaab-d6ee-43fc-b4f9-a512d0ba2df7 | private-subnet      | 64cabd5a-963c-464b-991e-c7e254643b7a | 10.0.0.0/26         |
+| 72b451f1-30b5-4ee2-a23c-26e7accbb71c | ipv6-private-subnet | 64cabd5a-963c-464b-991e-c7e254643b7a | fd52:aee0:36f2::/64 |
+| c004fc77-2cdc-4530-9532-f5594766750f | heat-subnet         | c3a43981-1b8d-4dd2-bd6b-622959774cd8 | 10.0.5.0/24         |
++--------------------------------------+---------------------+--------------------------------------+---------------------+
+
+$ router-list openstack router list
++--------------------------------------+---------+--------+-------+----------------------------------+------+
+| ID                                   | Name    | Status | State | Project                          | HA   |
++--------------------------------------+---------+--------+-------+----------------------------------+------+
+| e2c283b4-715f-49a6-9139-9df05a47c6d8 | router1 | ACTIVE | UP    | 7f5efe0f910b419380129a01b4d8ef2e | True |
++--------------------------------------+---------+--------+-------+----------------------------------+------+
+
+$ orchestration-service-list openstack orchestration service list
++-----------+-------------+--------------------------------------+-----------+--------+----------------------------+--------+
+| Hostname  | Binary      | Engine ID                            | Host      | Topic  | Updated At                 | Status |
++-----------+-------------+--------------------------------------+-----------+--------+----------------------------+--------+
+| openstack | heat-engine | 7bf19470-a1a6-41ef-9d0d-14140b21bd8c | openstack | engine | 2026-08-17T10:41:05.000000 | up     |
+| openstack | heat-engine | 7615866f-7790-483f-874a-42cd8491e2c5 | openstack | engine | 2026-08-17T10:41:05.000000 | up     |
++-----------+-------------+--------------------------------------+-----------+--------+----------------------------+--------+
+
+$ stack-list openstack stack list
+
+
+$ swift-container-list openstack container list
+
+
+$ server-create openstack server create --image cirros-0.6.3-x86_64-disk --flavor m1.nano --network private --wait module1-cli-instance
++-------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Field                               | Value                                                                                                                                                                                                                    |
++-------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| OS-DCF:diskConfig                   | MANUAL                                                                                                                                                                                                                   |
+| OS-EXT-AZ:availability_zone         | nova                                                                                                                                                                                                                     |
+| OS-EXT-SRV-ATTR:host                | openstack                                                                                                                                                                                                                |
+| OS-EXT-SRV-ATTR:hostname            | module1-cli-instance                                                                                                                                                                                                     |
+| OS-EXT-SRV-ATTR:hypervisor_hostname | openstack                                                                                                                                                                                                                |
+| OS-EXT-SRV-ATTR:instance_name       | instance-00000001                                                                                                                                                                                                        |
+| OS-EXT-SRV-ATTR:kernel_id           | None                                                                                                                                                                                                                     |
+| OS-EXT-SRV-ATTR:launch_index        | None                                                                                                                                                                                                                     |
+| OS-EXT-SRV-ATTR:ramdisk_id          | None                                                                                                                                                                                                                     |
+| OS-EXT-SRV-ATTR:reservation_id      | r-v60djjs6                                                                                                                                                                                                               |
+| OS-EXT-SRV-ATTR:root_device_name    | /dev/vda                                                                                                                                                                                                                 |
+| OS-EXT-SRV-ATTR:user_data           | None                                                                                                                                                                                                                     |
+| OS-EXT-STS:power_state              | Running                                                                                                                                                                                                                  |
+| OS-EXT-STS:task_state               | None                                                                                                                                                                                                                     |
+| OS-EXT-STS:vm_state                 | active                                                                                                                                                                                                                   |
+| OS-SRV-USG:launched_at              | 2026-08-17T10:42:19.000000                                                                                                                                                                                               |
+| OS-SRV-USG:terminated_at            | None                                                                                                                                                                                                                     |
+| accessIPv4                          | None                                                                                                                                                                                                                     |
+| accessIPv6                          | None                                                                                                                                                                                                                     |
+| addresses                           | private=10.0.0.25, fd52:aee0:36f2:0:f816:3eff:fe9a:d280                                                                                                                                                                  |
+| adminPass                           | HZZEbCZbc899                                                                                                                                                                                                             |
+| config_drive                        | None                                                                                                                                                                                                                     |
+| created                             | 2026-08-17T10:41:55Z                                                                                                                                                                                                     |
+| description                         | None                                                                                                                                                                                                                     |
+| flavor                              | description=, disk='1', ephemeral='0', extra_specs.hw_rng:allowed='True', id='m1.nano', is_disabled=, is_public='True', location=, name='m1.nano', original_name='m1.nano', ram='192', rxtx_factor=, swap='0', vcpus='1' |
+| hostId                              | 6d3e75325c97bec0e3a907f5ef94bc74dc63dfa6d5cbf7a458a86fa0                                                                                                                                                                 |
+| host_status                         | UP                                                                                                                                                                                                                       |
+| id                                  | ca34518b-66fe-46b2-a09c-8034d871c164                                                                                                                                                                                     |
+| image                               | cirros-0.6.3-x86_64-disk (7258d253-10bb-447a-870c-fbd5f55cbe60)                                                                                                                                                          |
+| key_name                            | None                                                                                                                                                                                                                     |
+| locked                              | None                                                                                                                                                                                                                     |
+| locked_reason                       | None                                                                                                                                                                                                                     |
+| name                                | module1-cli-instance                                                                                                                                                                                                     |
+| pinned_availability_zone            | None                                                                                                                                                                                                                     |
+| progress                            | None                                                                                                                                                                                                                     |
+| project_id                          | 584ac8167bd14822afc4cd874345ddce                                                                                                                                                                                         |
+| properties                          | None                                                                                                                                                                                                                     |
+| scheduler_hints                     |                                                                                                                                                                                                                          |
+| security_groups                     | name='default'                                                                                                                                                                                                           |
+| server_groups                       | None                                                                                                                                                                                                                     |
+| status                              | ACTIVE                                                                                                                                                                                                                   |
+| tags                                |                                                                                                                                                                                                                          |
+| trusted_image_certificates          | None                                                                                                                                                                                                                     |
+| updated                             | 2026-08-17T10:42:20Z                                                                                                                                                                                                     |
+| user_id                             | db816ecdf1524664876db0f82b6b09bb                                                                                                                                                                                         |
+| volumes_attached                    |                                                                                                                                                                                                                          |
++-------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+$ server-show openstack server show module1-cli-instance
++-------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Field                               | Value                                                                                                                                                                                                                    |
++-------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| OS-DCF:diskConfig                   | MANUAL                                                                                                                                                                                                                   |
+| OS-EXT-AZ:availability_zone         | nova                                                                                                                                                                                                                     |
+| OS-EXT-SRV-ATTR:host                | openstack                                                                                                                                                                                                                |
+| OS-EXT-SRV-ATTR:hostname            | module1-cli-instance                                                                                                                                                                                                     |
+| OS-EXT-SRV-ATTR:hypervisor_hostname | openstack                                                                                                                                                                                                                |
+| OS-EXT-SRV-ATTR:instance_name       | instance-00000001                                                                                                                                                                                                        |
+| OS-EXT-SRV-ATTR:kernel_id           |                                                                                                                                                                                                                          |
+| OS-EXT-SRV-ATTR:launch_index        | 0                                                                                                                                                                                                                        |
+| OS-EXT-SRV-ATTR:ramdisk_id          |                                                                                                                                                                                                                          |
+| OS-EXT-SRV-ATTR:reservation_id      | r-v60djjs6                                                                                                                                                                                                               |
+| OS-EXT-SRV-ATTR:root_device_name    | /dev/vda                                                                                                                                                                                                                 |
+| OS-EXT-SRV-ATTR:user_data           | None                                                                                                                                                                                                                     |
+| OS-EXT-STS:power_state              | Running                                                                                                                                                                                                                  |
+| OS-EXT-STS:task_state               | None                                                                                                                                                                                                                     |
+| OS-EXT-STS:vm_state                 | active                                                                                                                                                                                                                   |
+| OS-SRV-USG:launched_at              | 2026-08-17T10:42:19.000000                                                                                                                                                                                               |
+| OS-SRV-USG:terminated_at            | None                                                                                                                                                                                                                     |
+| accessIPv4                          |                                                                                                                                                                                                                          |
+| accessIPv6                          |                                                                                                                                                                                                                          |
+| addresses                           | private=10.0.0.25, fd52:aee0:36f2:0:f816:3eff:fe9a:d280                                                                                                                                                                  |
+| config_drive                        |                                                                                                                                                                                                                          |
+| created                             | 2026-08-17T10:41:55Z                                                                                                                                                                                                     |
+| description                         | None                                                                                                                                                                                                                     |
+| flavor                              | description=, disk='1', ephemeral='0', extra_specs.hw_rng:allowed='True', id='m1.nano', is_disabled=, is_public='True', location=, name='m1.nano', original_name='m1.nano', ram='192', rxtx_factor=, swap='0', vcpus='1' |
+| hostId                              | 6d3e75325c97bec0e3a907f5ef94bc74dc63dfa6d5cbf7a458a86fa0                                                                                                                                                                 |
+| host_status                         | UP                                                                                                                                                                                                                       |
+| id                                  | ca34518b-66fe-46b2-a09c-8034d871c164                                                                                                                                                                                     |
+| image                               | cirros-0.6.3-x86_64-disk (7258d253-10bb-447a-870c-fbd5f55cbe60)                                                                                                                                                          |
+| key_name                            | None                                                                                                                                                                                                                     |
+| locked                              | False                                                                                                                                                                                                                    |
+| locked_reason                       | None                                                                                                                                                                                                                     |
+| name                                | module1-cli-instance                                                                                                                                                                                                     |
+| pinned_availability_zone            | None                                                                                                                                                                                                                     |
+| progress                            | 0                                                                                                                                                                                                                        |
+| project_id                          | 584ac8167bd14822afc4cd874345ddce                                                                                                                                                                                         |
+| properties                          |                                                                                                                                                                                                                          |
+| scheduler_hints                     |                                                                                                                                                                                                                          |
+| security_groups                     | name='default'                                                                                                                                                                                                           |
+| server_groups                       | None                                                                                                                                                                                                                     |
+| status                              | ACTIVE                                                                                                                                                                                                                   |
+| tags                                |                                                                                                                                                                                                                          |
+| trusted_image_certificates          | None                                                                                                                                                                                                                     |
+| updated                             | 2026-08-17T10:42:20Z                                                                                                                                                                                                     |
+| user_id                             | db816ecdf1524664876db0f82b6b09bb                                                                                                                                                                                         |
+| volumes_attached                    |                                                                                                                                                                                                                          |
++-------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+$ server-list-openstack openstack server list
++--------------------------------------+----------------------+--------+---------------------------------------------------------+--------------------------+---------+
+| ID                                   | Name                 | Status | Networks                                                | Image                    | Flavor  |
++--------------------------------------+----------------------+--------+---------------------------------------------------------+--------------------------+---------+
+| ca34518b-66fe-46b2-a09c-8034d871c164 | module1-cli-instance | ACTIVE | private=10.0.0.25, fd52:aee0:36f2:0:f816:3eff:fe9a:d280 | cirros-0.6.3-x86_64-disk | m1.nano |
++--------------------------------------+----------------------+--------+---------------------------------------------------------+--------------------------+---------+
+
+$ server-delete openstack server delete --wait module1-cli-instance
+
+$ server-list-after-delete openstack server list
++--------------------------------------+----------------------+---------+----------+--------------------------+---------+
+| ID                                   | Name                 | Status  | Networks | Image                    | Flavor  |
++--------------------------------------+----------------------+---------+----------+--------------------------+---------+
+| ca34518b-66fe-46b2-a09c-8034d871c164 | module1-cli-instance | DELETED |          | cirros-0.6.3-x86_64-disk | m1.nano |
++--------------------------------------+----------------------+---------+----------+--------------------------+---------+
+
+Module 1 CLI lifecycle completed successfully at 2026-08-17T10:42:34+00:00
