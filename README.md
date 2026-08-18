@@ -7,7 +7,7 @@ Shared repository for the three-person OpenStack course project. The lab runs on
 | Area | Status | Owner |
 |---|---|---|
 | Base infrastructure | Complete | Infra / Integration Lead |
-| Module 1 — Horizon and core services | Complete, with one live test instance awaiting final Horizon deletion | Infra / Integration Lead |
+| Module 1 — Horizon and core services | Complete | Infra / Integration Lead |
 | Module 2 — Network topology | Not started | Network / Compute Lead |
 | Module 3 — Web service | Not started | Network / Compute Lead |
 | Module 4 — Swift and Cinder persistence | Not started | Storage / Automation Lead |
@@ -70,7 +70,7 @@ Module 1 evidence covers:
 - Heat Stacks
 - Swift Containers
 - CLI instance launch and deletion
-- Horizon launch dialog and Active/Running instance
+- Horizon launch dialog, Active/Running instance, delete confirmation, and empty post-termination list
 
 Files:
 
@@ -79,7 +79,7 @@ Files:
 - CLI automation: `module1/run-module1-cli.sh`
 - Screenshot automation: `module1/capture-horizon-evidence.py`
 
-The final Horizon-delete screenshot already demonstrates an empty instance list from a previous verified run. A new live UI-launched instance remains active because the final destructive action requires explicit approval; delete it through Horizon before Module 2 begins, then refresh `10-compute-instances-after-terminate.png` if desired.
+The Horizon UI lifecycle is complete: the instance was launched, reached Active/Running, deleted through the Horizon confirmation flow, and verified absent through both Horizon and OpenStack CLI.
 
 ## Team workflow
 

@@ -1,6 +1,6 @@
 # Module 1 — Horizon and Core Services
 
-Status: functionally complete.
+Status: complete.
 
 ## Requirements covered
 
@@ -11,12 +11,14 @@ Status: functionally complete.
 - Object Store: Swift Containers
 - Instance launch/delete through CLI
 - Instance launch through Horizon UI
+- Instance deletion through Horizon UI
 
 ## Evidence
 
 | File | Evidence |
 |---|---|
 | `evidence/horizon/00-horizon-launch-dialog.png` | Horizon launch dialog |
+| `evidence/horizon/00-horizon-delete-confirmation.png` | Horizon irreversible-delete confirmation |
 | `evidence/horizon/01-compute-overview.png` | Compute overview and usage |
 | `evidence/horizon/02-compute-instances-active.png` | Horizon instance Active/Running |
 | `evidence/horizon/03-compute-images.png` | Active CirrOS/Fedora images |
@@ -27,7 +29,7 @@ Status: functionally complete.
 | `evidence/horizon/07-network-routers.png` | Active router and public gateway |
 | `evidence/horizon/08-orchestration-stacks.png` | Heat Stacks dashboard |
 | `evidence/horizon/09-object-store-containers.png` | Swift Containers dashboard |
-| `evidence/horizon/10-compute-instances-after-terminate.png` | Empty instance list after a verified termination |
+| `evidence/horizon/10-compute-instances-after-terminate.png` | Empty instance list after Horizon termination |
 | `evidence/cli/module1-cli.log` | Full CLI inventory and instance lifecycle |
 
 ## Reproduce the CLI lifecycle
@@ -48,6 +50,6 @@ ssh newnol@192.168.2.10 'chmod +x ~/run-module1-cli.sh && ~/run-module1-cli.sh'
 
 The script creates `module1-cli-instance`, waits for `ACTIVE`, records its details, then deletes it.
 
-## Final cleanup note
+## Final state
 
-A new `module1-horizon-instance` was launched directly through Horizon UI to strengthen the evidence. It is intentionally not deleted by repository automation because deletion is destructive. Before Module 2 begins, the Infra Lead should delete it through Horizon and optionally refresh `10-compute-instances-after-terminate.png`.
+`module1-horizon-instance` was launched directly through Horizon, reached Active/Running, and was deleted through Horizon after capturing its confirmation dialog. Both the `demo` project and the admin all-projects view were verified to contain no servers afterward. Module 2 can begin from a clean instance state.
