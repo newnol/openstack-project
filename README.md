@@ -26,8 +26,13 @@ Shared repository for the three-person OpenStack course project. The lab runs on
 - Nova virtualization: nested KVM
 - Optional services enabled during the initial deployment: Heat, Heat Dashboard, Swift
 - Horizon: `http://192.168.2.10/dashboard`
+- NetBird HTTPS entry point: `https://openstack.net.selfhost.io.vn/dashboard`
 
 Ubuntu 24.04 was selected because it is supported by DevStack `stable/2026.1`. The assignment mentions Ubuntu 22.04; this difference must be disclosed in the report.
+
+The NetBird HTTPS endpoint terminates TLS before proxying to Horizon. The live
+Horizon settings trust this HTTPS origin and honor `X-Forwarded-Proto` and
+`X-Forwarded-Host`; otherwise Django rejects login with a CSRF origin error.
 
 ## Credentials
 
