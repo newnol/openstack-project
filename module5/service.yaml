@@ -1,0 +1,151 @@
+heat_template_version: 2021-04-16
+
+description: >
+  Module 5 - Heat Orchestration Template (Phase B - Full).
+  Creates a network, subnet, router, security group, server, Cinder volume, floating IP, and uses cloud-init to deploy the web application automatically.
+
+parameters:
+  image:
+    type: string
+    description: Name of image to use for servers
+    default: Fedora-Cloud-Base-37-1.7.x86_64
+  flavor:
+    type: string
+    description: Flavor to use for servers
+    default: m1.small
+  key_name:
+    type: string
+    description: Name of keypair to assign to servers
+    default: module3-key-pair
+  public_network:
+    type: string
+    description: Name of the external network for the router
+    default: public
+
+resources:
+  # 1. Network & Subnet
+  m5_dmz_net:
+    type: OS::Neutron::Net
+    properties:
+      name: m5-dmz-net
+
+  m5_dmz_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      name: m5-dmz-subnet
+      network: { get_resource: m5_dmz_net }
+      cidr: 10.50.10.0/24
+      dns_nameservers: [ 8.8.8.8, 1.1.1.1 ]
+
+  # 2. Router
+  m5_router:
+    type: OS::Neutron::Router
+    properties:
+      name: m5-router
+      external_gateway_info:
+        network: { get_param: public_network }
+
+  m5_router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: { get_resource: m5_router }
+      subnet: { get_resource: m5_dmz_subnet }
+
+  # 3. Security Group
+  m5_web_sg:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: m5-web-sg
+      description: Allow SSH, HTTP, and ICMP
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+        - protocol: tcp
+          port_range_min: 80
+          port_range_max: 80
+
+  # 4. Port (Explicitly created for Floating IP association)
+  m5_web_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: m5_dmz_net }
+      security_groups:
+        - { get_resource: m5_web_sg }
+      fixed_ips:
+        - subnet: { get_resource: m5_dmz_subnet }
+
+  # 5. Floating IP
+  m5_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: public_network }
+      port_id: { get_resource: m5_web_port }
+
+  # 6. Cinder Volume
+  m5_data_volume:
+    type: OS::Cinder::Volume
+    properties:
+      name: m5-data-volume
+      size: 1
+
+  # 7. Compute Server with Cloud-Init
+  m5_server:
+    type: OS::Nova::Server
+    properties:
+      name: m5-web-server
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: m5_web_port }
+      user_data_format: RAW
+      user_data: |
+        #!/bin/bash
+        # 1. Wait for Cinder volume to appear
+        for i in {1..30}; do
+          if [ -b /dev/vdb ]; then
+            break
+          fi
+          sleep 2
+        done
+        
+        # 2. Format and Mount
+        blkid /dev/vdb || mkfs.ext4 /dev/vdb
+        mkdir -p /mnt/app
+        mount /dev/vdb /mnt/app
+        
+        # 3. Create/Download App Code
+        cat << 'EOF' > /mnt/app/index.html
+        <!DOCTYPE html>
+        <html>
+        <head><title>Module 5</title></head>
+        <body>
+            <h1>Module 5 - Heat Automated Deployment</h1>
+            <p>Cloud-init successfully formatted the Cinder volume, mounted it, and started this web server!</p>
+        </body>
+        </html>
+        EOF
+        
+        # 4. Start HTTP Server in background
+        nohup python3 -m http.server 80 --directory /mnt/app > /var/log/m5-http.log 2>&1 &
+
+  # 8. Attach Volume to Server
+  m5_volume_attachment:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      volume_id: { get_resource: m5_data_volume }
+      instance_uuid: { get_resource: m5_server }
+
+outputs:
+  floating_ip:
+    description: The public IP address of the web server
+    value: { get_attr: [m5_floating_ip, floating_ip_address] }
+  service_url:
+    description: The URL to access the deployed web application
+    value:
+      str_replace:
+        template: "http://%ip%"
+        params:
+          "%ip%": { get_attr: [m5_floating_ip, floating_ip_address] }
