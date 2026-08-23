@@ -45,13 +45,14 @@ Giao diện quản trị Web & \url{https://openstack.net.selfhost.io.vn/dashboa
 \begin{tabularx}{\linewidth}{|l|l|>{\raggedright\arraybackslash}X|c|}
 \hline
 \textbf{Thành viên} & \textbf{Vai trò} & \textbf{Nhiệm vụ Phụ trách} & \textbf{Đóng góp} \\ \hline
-Ngô Tấn Tài (23127470) & Trưởng nhóm & & 100\% \\ \hline
-Nguyễn Tấn Lộc (23127406) & Thành viên & & 100\% \\ \hline
-Hồ Minh Dũng (23127174) & Thành viên & & 100\% \\ \hline
+Ngô Tấn Tài (23127470) & Trưởng nhóm & Quản trị máy chủ Proxmox/DevStack, thiết lập VPN NetBird, thực thi Module 1 (Khảo sát dịch vụ cốt lõi Nova/Glance/Neutron trên Horizon \& CLI) và quản lý tài nguyên chung. & 100\% \\ \hline
+Nguyễn Tấn Lộc (23127406) & Thành viên & Thiết kế mạng phân tầng SDN Module 2 (DMZ/Private, Router L3), triển khai máy ảo Dual-NIC Module 3, cấu hình định tuyến kernel xử lý Asymmetric Routing và ánh xạ Floating IP. & 100\% \\ \hline
+Hồ Minh Dũng (23127174) & Thành viên & Triển khai lưu trữ Swift \& Cinder Module 4, thực nghiệm phục hồi thảm họa với Snapshot; xây dựng mẫu Heat HOT \& Cloud-Init tự động hóa Module 5; tổng hợp kiểm thử toàn trình và biên soạn báo cáo. & 100\% \\ \hline
 \end{tabularx}
 \caption{Bảng phân công trách nhiệm và tỷ lệ đóng góp của các thành viên trong nhóm.}
 \label{tab:team_assignment}
 \end{table}
 
 \noindent \textbf{Quy tắc đặt tên tài nguyên (Naming Conventions):} Các thành viên trong nhóm thống nhất bắt buộc sử dụng tiền tố theo từng module (ví dụ: \texttt{m2-dmz-net}, \texttt{m3-web-server}, \texttt{m4-data-volume}, \texttt{m5-server}). Quy tắc này giúp ngăn ngừa triệt để việc ghi đè cấu hình và giúp quá trình nghiệm thu, dọn dẹp tài nguyên diễn ra độc lập mà không ảnh hưởng đến phần việc của nhau.
+
 
