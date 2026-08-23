@@ -1,0 +1,29 @@
+\section{Conclusion}
+
+\subsection{Key Findings \& Architectural Comparison}
+This project provided comprehensive practical validation of building and operating a multi-tier private cloud infrastructure using OpenStack. Table~\ref{tab:comparison} synthesizes the operational characteristics between manual provisioning (Modules 1--4) and declarative orchestration with Heat (Module 5).
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\linewidth}{|l|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
+\hline
+\textbf{Evaluation Metric} & \textbf{Manual Provisioning (Mod 1--4)} & \textbf{Heat Orchestration (Mod 5)} \\ \hline
+Provisioning Time & 15--25 minutes (multi-step CLI/UI) & $\approx 60$ seconds (\texttt{openstack stack create}) \\ \hline
+Human Error Rate & High (misconfigured IP, gateway, metric) & Near Zero (idempotent, codified template) \\ \hline
+Resource Teardown & Tedious manual deletion in reverse order & Single command (\texttt{openstack stack delete}) \\ \hline
+Auditability \& Versioning & Ephemeral terminal history & Git-versioned declarative YAML template \\ \hline
+\end{tabularx}
+\caption{Operational comparison between manual provisioning and Heat declarative orchestration.}
+\label{tab:comparison}
+\end{table}
+
+\subsection{Summary of Accomplishments}
+Through systematic execution across all five modules, the following milestones were achieved:
+\begin{enumerate}
+    \item Established an operational all-in-one OpenStack cloud platform with compute, networking, block storage, object storage, and orchestration capabilities.
+    \item Implemented multi-tier software-defined tenant networking with strict DMZ and Private subnet isolation.
+    \item Resolved fundamental networking challenges in multi-homed compute instances, including asymmetric routing and stateful NAT connection tracking.
+    \item Validated enterprise storage patterns by decoupling static asset storage (Swift), block-level execution (Cinder), and point-in-time snapshot disaster recovery.
+    \item Fully codified the cloud infrastructure stack into a single Heat template, demonstrating automated provisioning and idempotent bootstrapping.
+\end{enumerate}

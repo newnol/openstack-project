@@ -1,0 +1,77 @@
+<mxfile host="app.diagrams.net" modified="2026-08-23T08:50:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
+  <diagram id="openstack-arch" name="OpenStack System Architecture">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Horizon UI -->
+        <mxCell id="horizon" value="&lt;b&gt;Horizon (Dashboard)&lt;/b&gt;&lt;br&gt;Web-based Management Console" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="380" y="40" width="380" height="55" as="geometry" />
+        </mxCell>
+        
+        <!-- Keystone Identity -->
+        <mxCell id="keystone" value="&lt;b&gt;Keystone (Identity &amp; Auth)&lt;/b&gt;&lt;br&gt;Token Authentication, Service Catalog &amp; Policy Enforcement" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="200" y="130" width="740" height="55" as="geometry" />
+        </mxCell>
+        
+        <!-- Core Control Services -->
+        <mxCell id="nova" value="&lt;b&gt;Nova&lt;/b&gt;&lt;br&gt;Compute Engine&lt;br&gt;&lt;i&gt;VM Lifecycle &amp; Scheduling&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="200" y="225" width="165" height="75" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="glance" value="&lt;b&gt;Glance&lt;/b&gt;&lt;br&gt;Image Service&lt;br&gt;&lt;i&gt;QCOW2 Catalog &amp; Storage&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="390" y="225" width="165" height="75" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="neutron" value="&lt;b&gt;Neutron&lt;/b&gt;&lt;br&gt;Network / SDN&lt;br&gt;&lt;i&gt;L2/L3 Routing, FIP, SGs&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="580" y="225" width="165" height="75" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="heat" value="&lt;b&gt;Heat&lt;/b&gt;&lt;br&gt;Orchestration&lt;br&gt;&lt;i&gt;HOT Templates &amp; IaC&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="770" y="225" width="170" height="75" as="geometry" />
+        </mxCell>
+        
+        <!-- Storage Layer -->
+        <mxCell id="cinder" value="&lt;b&gt;Cinder (Block Storage)&lt;/b&gt;&lt;br&gt;Persistent Raw Volumes &amp; Snapshots&lt;br&gt;&lt;i&gt;(LVM / iSCSI Driver Backend)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="270" y="340" width="280" height="75" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="swift" value="&lt;b&gt;Swift (Object Storage)&lt;/b&gt;&lt;br&gt;RESTful Blob Storage &amp; Static Buckets&lt;br&gt;&lt;i&gt;(Public Read ACL, Application Bundles)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="590" y="340" width="280" height="75" as="geometry" />
+        </mxCell>
+        
+        <!-- Infrastructure / Hypervisor Layer -->
+        <mxCell id="infra" value="&lt;b&gt;Underlying Host Hypervisor (Ubuntu Server 24.04.4 LTS / KVM / Proxmox VE)&lt;/b&gt;&lt;br&gt;4 vCPU | 22 GiB RAM | 73 GiB NVMe Root Disk | DevStack branch: &lt;b&gt;stable/2026.1&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="200" y="455" width="740" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Connectors -->
+        <mxCell id="edge1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="horizon" target="keystone">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.12;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="keystone" target="nova">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.38;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="keystone" target="glance">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.64;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="keystone" target="neutron">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.88;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="keystone" target="heat">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.35;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="nova" target="cinder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.35;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="cinder" target="infra">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.73;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="swift" target="infra">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

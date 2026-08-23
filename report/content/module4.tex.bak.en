@@ -1,0 +1,95 @@
+\section{Module 4: Persistent Storage \& Snapshot Disaster Recovery}
+
+\subsection{Objective \& Storage Architecture}
+Cloud computing decouples ephemeral compute nodes from persistent state. Module 4 implements a hybrid storage model combining:
+\begin{itemize}
+    \item \textbf{Object Storage (Swift):} Highly scalable, RESTful storage for unstructured static assets and source code bundles.
+    \item \textbf{Block Storage (Cinder):} High-performance, POSIX-compliant block devices attached to compute instances for stateful data execution.
+    \item \textbf{Disaster Recovery (Snapshot Lifecycle):} Point-in-time snapshotting enabling volume replication and recovery on independent compute instances.
+\end{itemize}
+
+\subsection{Swift Object Storage Setup}
+A dedicated Swift container was initialized to store application source code:
+\begin{itemize}
+    \item \textbf{Container Creation:} Container \texttt{module4-tetris-src} was provisioned with \texttt{Policy-0} and public read access (\nolinkurl{Read-ACL=.r:*}) enabled.
+    \item \textbf{Object Upload:} Static web application source \texttt{index.html} (247 bytes) was uploaded into the container (Figure~\ref{fig:m4_swift_upload}).
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m4-swift-container-object-upload.png}
+\caption{Swift container \texttt{module4-tetris-src} storing \texttt{index.html} with public read ACL.}
+\label{fig:m4_swift_upload}
+\end{figure}
+
+\subsection{Cinder Volume Integration \& Web Deployment}
+\begin{enumerate}
+    \item \textbf{Volume Provisioning \& Attachment:}
+    A 1 GiB Cinder volume named \nolinkurl{module4-data-volume} was created and attached to \texttt{module3-web-sever}, recognized by the guest hypervisor driver as \texttt{/dev/vdc} (Figure~\ref{fig:m4_cinder_volume}).
+    
+    \item \textbf{In-Guest Filesystem \& Ingestion (Figure~\ref{fig:m4_vm1_workflow}):}
+    Inside the instance, the volume was formatted and populated from Swift:
+\begin{lstlisting}[language=bash, basicstyle=\ttfamily\scriptsize]
+$ sudo mkfs.ext4 /dev/vdc
+$ sudo mkdir -p /mnt/data && sudo mount /dev/vdc /mnt/data
+$ cd /mnt/data
+$ sudo wget http://192.168.2.10:8080/v1/AUTH_.../module4-tetris-src/index.html
+\end{lstlisting}
+
+    \item \textbf{Service Execution:}
+    The web daemon was bound to the Cinder mount point:
+\begin{lstlisting}[language=bash, basicstyle=\ttfamily\scriptsize]
+$ sudo busybox httpd -f -p 80 -h /mnt/data &
+$ curl http://127.0.0.1
+\end{lstlisting}
+    Verified valid HTML content served directly from the persistent block device.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m4-cinder-volume-attached.png}
+\caption{Cinder volume \texttt{module4-data-volume} (1 GiB) attached to \texttt{module3-web-sever}.}
+\label{fig:m4_cinder_volume}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m4-vm1-swift-fetch-cinder-host.png}
+\caption{Guest terminal workflow: downloading source from Swift, mounting Cinder storage, and serving HTTP traffic.}
+\label{fig:m4_vm1_workflow}
+\end{figure}
+
+\subsection{Snapshot Generation \& Disaster Recovery Verification}
+To demonstrate data durability against compute failure:
+\begin{enumerate}
+    \item \textbf{Volume Detachment \& Snapshot Creation:}
+    The filesystem was unmounted and detached from \texttt{module3-web-sever}. A point-in-time snapshot \texttt{module4-data-snapshot} (1 GiB) was captured (Figure~\ref{fig:m4_volume_snapshot}).
+    
+    \item \textbf{Volume Restoration from Snapshot:}
+    A new independent volume, \nolinkurl{module4-restored-volume}, was instantiated directly from \texttt{module4-data-snapshot}.
+
+    \item \textbf{Attachment to Independent Recovery Instance:}
+    A clean recovery VM, \nolinkurl{module4-recovery-server} (Fedora-based), was provisioned on \texttt{m2-dmz-net}, and \nolinkurl{module4-restored-volume} was attached.
+
+    \item \textbf{Data Integrity Inspection (Figure~\ref{fig:m4_recovery_verify}):}
+    On the recovery VM, the restored disk was mounted directly without re-formatting:
+\begin{lstlisting}[language=bash, basicstyle=\ttfamily\scriptsize]
+[fedora@module4-recovery-server ~]$ sudo mount /dev/vdb /mnt/recovered
+[fedora@module4-recovery-server ~]$ sudo cat /mnt/recovered/index.html
+\end{lstlisting}
+    The file \texttt{index.html} was retrieved 100\% intact, proving zero data loss across instance teardown and reconstruction.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m4-cinder-volume-snapshot.png}
+\caption{Cinder snapshot \texttt{module4-data-snapshot} capturing disk state.}
+\label{fig:m4_volume_snapshot}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m4-recovery-server-data-verification.png}
+\caption{Integrity validation on recovery VM confirming data persistence.}
+\label{fig:m4_recovery_verify}
+\end{figure}

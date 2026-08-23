@@ -11,15 +11,49 @@ secure.yaml
 # Real DevStack configuration contains passwords
 devstack/local.conf
 
-# Python and editor artifacts
+# Python and virtual environments
 __pycache__/
 *.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# OS and Editor artifacts
 .DS_Store
+Thumbs.db
+desktop.ini
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+*.bak
 
-# Generated archives and temporary files
+# LaTeX Auxiliary and Build Artifacts
+*.aux
+*.bbl
+*.blg
+*.idx
+*.ind
+*.ilg
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.nav
+*.snm
+*.vrb
+*.upa
+*.upb
+
+# Generated archives and temporary scratch files
 *.zip
 *.tar
 *.tar.gz
 *.tmp
+scratch/
+check_title/

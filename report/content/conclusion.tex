@@ -1,0 +1,47 @@
+\section{Tổng kết \& Đánh giá Đồ án}
+
+\subsection{So sánh Vận hành Thủ công vs Tự động hóa Heat}
+Thông qua quá trình triển khai thực tế toàn bộ 5 module, nhóm chúng em đã tiến hành đo đạc và đối chiếu thực nghiệm giữa hai phương pháp quản trị hạ tầng trên OpenStack: phương pháp thực thi thủ công theo từng bước mệnh lệnh (Imperative Approach) và phương pháp tự động hóa khai báo với Heat Orchestration (Declarative IaC Approach). Bảng~\ref{tab:comparison} tổng hợp chi tiết các chỉ số và đặc tính vận hành giữa hai mô hình:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\linewidth}{|l|>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X|}
+\hline
+\textbf{Tiêu chí Đánh giá} & \textbf{Vận hành Thủ công (Mod 1--4)} & \textbf{Điều phối Heat (Mod 5)} \\ \hline
+Thời gian Cấp phát & 15--25 phút (nhiều bước qua CLI/Horizon) & $\approx 60$ giây (1 lệnh \texttt{openstack stack create}) \\ \hline
+Tỷ lệ Sai sót Con người & Cao (dễ nhầm IP, sai gateway, thiếu rule SG) & Gần như triệt tiêu (khai báo chuẩn hóa, có tính Idempotent) \\ \hline
+Thu hồi Tài nguyên & Phức tạp, bắt buộc xóa ngược thứ tự phụ thuộc & Tối giản, tự động giải phóng qua 1 lệnh (\texttt{stack delete}) \\ \hline
+Quản lý Phiên bản & Lịch sử dòng lệnh rời rạc, khó lưu vết & Template YAML có cấu trúc, quản lý tập trung qua Git \\ \hline
+Khả năng Tái lập & Khó nhân bản chính xác trên môi trường mới & Tái lập môi trường tức thì chỉ với một tệp tham số \\ \hline
+\end{tabularx}
+\caption{So sánh đặc tính vận hành giữa phương pháp thủ công và tự động hóa khai báo với Heat.}
+\label{tab:comparison}
+\end{table}
+
+\subsection{Tổng kết Kết quả Đạt được}
+Đồ án đã giúp nhóm chúng em hoàn thành toàn diện và xuất sắc tất cả các mục tiêu kỹ thuật đề ra ban đầu:
+\begin{enumerate}
+    \item \textbf{Làm chủ Hạ tầng Đám mây Cốt lõi:} Xây dựng thành công hệ thống đám mây riêng OpenStack tích hợp đầy đủ năng lực tính toán (Nova), mạng điều khiển bằng phần mềm (Neutron), lưu trữ khối (Cinder), lưu trữ đối tượng (Swift) và điều phối tự động (Heat).
+    \item \textbf{Thiết kế Mạng Đa tầng Bảo mật:} Hiện thực hóa kiến trúc mạng doanh nghiệp phân vùng nghiêm ngặt giữa dải mạng DMZ công khai và dải mạng Private nội bộ, kiểm soát luồng dữ liệu an toàn qua Router L3 và Floating IP.
+    \item \textbf{Giải quyết Triệt để Bài toán Định tuyến Phức tạp:} Chẩn đoán và xử lý thành công hiện tượng rớt gói tin do định tuyến bất đối xứng (Asymmetric Routing) trên máy ảo đa card mạng, làm chủ cơ chế theo dõi trạng thái phiên kết nối Netfilter Conntrack của nhân Linux.
+    \item \textbf{Hiện thực hóa Mô hình Lưu trữ Doanh nghiệp:} Triển khai hiệu quả mô hình lưu trữ lai kết hợp giữa Swift và Cinder, đồng thời kiểm chứng thành công quy trình sao lưu và phục hồi thảm họa tức thời thông qua Volume Snapshot với độ toàn vẹn dữ liệu đạt 100\%.
+    \item \textbf{Tự động hóa Toàn diện với IaC:} Chuẩn hóa toàn bộ hạ tầng thành mã nguồn mẫu Heat Orchestration Template (HOT), kết hợp cùng kịch bản Cloud-Init có tính Idempotent để tự động hóa trọn gói quá trình cấp phát và triển khai dịch vụ mà không cần bất kỳ can thiệp thủ công nào.
+\end{enumerate}
+
+\subsection{Bài học Kinh nghiệm \& Hướng Phát triển}
+\noindent \textbf{Bài học Kinh nghiệm Thực tiễn:}
+Qua quá trình trực tiếp triển khai và xử lý sự cố trên OpenStack, nhóm chúng em đã đúc kết được những kinh nghiệm thực tế quý giá:
+\begin{itemize}
+    \item Tầm quan trọng của việc hiểu sâu cơ chế mạng ở tầng nhân Linux (Kernel Routing, IPTables, Conntrack) khi vận hành các hệ thống ảo hóa đa cổng mạng.
+    \item Nhận thức rõ sự khác biệt giữa các mô hình lưu trữ (Block vs Object) để lựa chọn giải pháp tối ưu cho từng loại dữ liệu ứng dụng.
+    \item Kỹ năng phòng ngừa và xử lý các vấn đề tương tranh thời gian (Race Condition) trong môi trường tự động hóa phân tán.
+\end{itemize}
+
+\noindent \textbf{Hướng Phát triển Mở rộng:}
+Dựa trên nền tảng hạ tầng đã xây dựng thành công, đồ án có thể tiếp tục được mở rộng theo các hướng nghiên cứu ứng dụng chuyên sâu:
+\begin{itemize}
+    \item \textbf{Tích hợp Đường ống CI/CD:} Kết nối Heat template với GitLab CI / GitHub Actions để tự động hóa quy trình kiểm thử và triển khai hạ tầng liên tục (GitOps).
+    \item \textbf{Mở rộng Công cụ IaC Đa nền tảng:} Thử nghiệm chuyển dịch từ Heat sang Terraform và Ansible nhằm nâng cao tính linh hoạt và khả năng quản lý hạ tầng đa đám mây (Multi-Cloud).
+    \item \textbf{Nền tảng Điều phối Container (Kubernetes on OpenStack):} Khởi tạo cụm Kubernetes trên các máy ảo OpenStack thông qua OpenStack Magnum, xây dựng hạ tầng sẵn sàng cho các ứng dụng kiến trúc Microservices hiện đại.
+\end{itemize}

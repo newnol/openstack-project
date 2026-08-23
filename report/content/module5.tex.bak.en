@@ -1,0 +1,133 @@
+\section{Module 5: Declarative Orchestration with OpenStack Heat}
+
+\subsection{Objective \& Infrastructure as Code (IaC) Paradigm}
+While Modules 1 through 4 demonstrated manual imperatively-driven provisioning, enterprise cloud operations require declarative automation. Module 5 implements full-stack automation via the \textbf{OpenStack Heat Orchestration Engine} using Heat Orchestration Templates (HOT)~\cite{heat_hot_guide}.
+
+A single declarative template (\texttt{service.yaml}) manages the entire lifecycle of networking, routing, security policies, block storage, compute provisioning, and guest application bootstrapping via Cloud-Init~\cite{cloudinit_docs}.
+
+\subsection{Heat Orchestration Template (HOT) Architecture}
+The template adheres to specification version \nolinkurl{2021-04-16} and encapsulates 10 interrelated OpenStack resource declarations:
+
+\begin{lstlisting}[language=yaml, basicstyle=\ttfamily\scriptsize, caption={Resource declaration in Heat Template (\texttt{module5\_service.yaml}).}]
+heat_template_version: 2021-04-16
+description: Complete automated stack with network, storage, VM, and cloud-init.
+
+parameters:
+  image: { type: string, default: Fedora-Cloud-Base-37-1.7.x86_64 }
+  flavor: { type: string, default: m1.small }
+  key_name: { type: string, default: module3-key-pair }
+  public_network: { type: string, default: public }
+
+resources:
+  m5_dmz_net:
+    type: OS::Neutron::Net
+    properties: { name: m5-dmz-net }
+
+  m5_dmz_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network: { get_resource: m5_dmz_net }
+      cidr: 10.50.10.0/24
+      dns_nameservers: [8.8.8.8, 1.1.1.1]
+
+  m5_router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info: { network: { get_param: public_network } }
+
+  m5_router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: { get_resource: m5_router }
+      subnet: { get_resource: m5_dmz_subnet }
+
+  m5_web_sg:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules:
+        - { protocol: tcp, port_range_min: 22, port_range_max: 22 }
+        - { protocol: tcp, port_range_min: 80, port_range_max: 80 }
+        - { protocol: icmp }
+
+  m5_web_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: m5_dmz_net }
+      security_groups: [{ get_resource: m5_web_sg }]
+
+  m5_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: public_network }
+      port_id: { get_resource: m5_web_port }
+
+  m5_data_volume:
+    type: OS::Cinder::Volume
+    properties: { name: m5-data-volume, size: 1 }
+
+  m5_server:
+    type: OS::Nova::Server
+    properties:
+      name: m5-web-server
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      networks: [{ port: { get_resource: m5_web_port } }]
+      user_data_format: RAW
+      user_data: |
+        #!/bin/bash
+        for i in {1..30}; do [ -b /dev/vdb ] && break; sleep 2; done
+        blkid /dev/vdb || mkfs.ext4 /dev/vdb
+        mkdir -p /mnt/app && mount /dev/vdb /mnt/app
+        echo "<h1>Module 5 - Heat Automated Deployment</h1>" > /mnt/app/index.html
+        nohup python3 -m http.server 80 --directory /mnt/app > /var/log/m5-http.log 2>&1 &
+
+  m5_volume_attachment:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      volume_id: { get_resource: m5_data_volume }
+      instance_uuid: { get_resource: m5_server }
+
+outputs:
+  service_url:
+    description: URL to access the deployed web application
+    value:
+      str_replace:
+        template: "http://%ip%"
+        params: { "%ip%": { get_attr: [m5_floating_ip, floating_ip_address] } }
+\end{lstlisting}
+
+\subsection{Cloud-Init Post-Configuration Pipeline}
+The embedded \texttt{user\_data} payload executes automatically during VM first boot:
+\begin{enumerate}
+    \item \textbf{Storage Discovery Loop:} Polls the kernel block subsystem until the attached Cinder volume (\texttt{/dev/vdb}) is initialized by \texttt{virtio\_blk}.
+    \item \textbf{Idempotent Formatting \& Mount:} Formats the volume with \texttt{ext4} only if no existing filesystem signature is detected (\texttt{blkid}), and mounts it at \texttt{/mnt/app}.
+    \item \textbf{Service Deployment:} Generates static content and binds a background HTTP daemon to port 80.
+\end{enumerate}
+
+\subsection{Stack Deployment \& Verification}
+The template was validated and launched via the OpenStack CLI:
+\begin{lstlisting}[language=bash]
+$ openstack orchestration template validate -t service.yaml
+$ openstack stack create -t service.yaml module5-stack
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m5-heat-stack-create-complete.png}
+\caption{Heat stack \texttt{module5-stack} verified in successful completed state.}
+\label{fig:m5_stack_status}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m5-heat-stack-topology-graph.png}
+\caption{Interactive Heat resource dependency tree rendered in Horizon.}
+\label{fig:m5_stack_topology}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Status Verification (Figure~\ref{fig:m5_stack_status}):} The stack resolved all dependencies in parallel and transitioned to \texttt{Check Complete}.
+    \item \textbf{Dependency Graph (Figure~\ref{fig:m5_stack_topology}):} Horizon visualizes the computed resource graph, explicitly mapping resource dependencies across compute, storage, and networking layers.
+    \item \textbf{Output Resolution:} The stack dynamically returned the public URL, which successfully served the deployed web application on first attempt without human intervention.
+\end{itemize}

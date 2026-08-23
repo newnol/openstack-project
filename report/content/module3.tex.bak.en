@@ -1,0 +1,91 @@
+\section{Module 3: Dual-Homed Compute \& Asymmetric Routing Management}
+
+\subsection{Objective \& Architectural Challenge}
+Module 3 deploys a multi-homed compute instance spanning both the DMZ and Private networks to act as an application gateway. A fundamental engineering challenge in multi-homed systems is \textbf{asymmetric routing} (Figure~\ref{fig:m3_asymm_concept}), wherein ingress packets arrive via one interface (DMZ with Floating IP) but response egress packets attempt to exit via a secondary interface (Private gateway), leading to packet drops by stateful firewalls.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{img/routing_traffic_flow.png}
+\caption{Ingress and egress traffic flow for the dual-homed web instance under symmetric routing control.}
+\label{fig:m3_asymm_concept}
+\end{figure}
+
+\subsection{Implementation Steps}
+\begin{enumerate}
+    \item \textbf{Security Group Provisioning (\texttt{module3-web-sg}):}
+    Created a custom security group with ingress rules allowing TCP port 22 (SSH), TCP port 80 (HTTP), and ICMP (Ping) from any remote IPv4 prefix (\nolinkurl{0.0.0.0/0}), as shown in Figure~\ref{fig:m3_secgroup_rules}.
+    
+    \item \textbf{Dual-NIC Instance Provisioning (\texttt{module3-web-sever}) (Figure~\ref{fig:m3_instance_overview}):}
+    Launched the instance with two dedicated virtual network interfaces:
+    \begin{itemize}
+        \item \textbf{NIC 1 (\texttt{eth1}):} Bound to \texttt{m2-dmz-net} with fixed IP \texttt{10.10.10.22}.
+        \item \textbf{NIC 2 (\texttt{eth0}):} Bound to \texttt{m2-private-net} with fixed IP \texttt{10.10.20.137}.
+    \end{itemize}
+    Verification of active tenant network inventory prior to attachment is documented in Figure~\ref{fig:m3_networks_verify}.
+
+    \item \textbf{Floating IP Association:}
+    Allocated external public IP \texttt{172.24.4.187} from pool \texttt{public} and associated it \textbf{strictly} with the DMZ port (\texttt{10.10.10.22}), as shown in Figure~\ref{fig:m3_floating_ip}.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m3-instance-dual-homed-overview.png}
+\caption{Dual-homed virtual machine \texttt{module3-web-sever} configured with dual NIC interfaces.}
+\label{fig:m3_instance_overview}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m3-network-inventory.png}
+\caption{Verification of active tenant networks utilized for dual-homed instance attachments.}
+\label{fig:m3_networks_verify}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m3-floating-ip-mapping.png}
+\caption{Floating IP \texttt{172.24.4.187} mapped strictly to DMZ fixed IP \texttt{10.10.10.22}.}
+\label{fig:m3_floating_ip}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m3-security-group-rules.png}
+\caption{Security group \texttt{module3-web-sg} rules opening ports 22, 80, and ICMP.}
+\label{fig:m3_secgroup_rules}
+\end{figure}
+
+\subsection{Kernel Routing Configuration \& Service Verification}
+Inside the guest operating system, network configuration and routing tables were inspected (Figure~\ref{fig:m3_ip_route}):
+\begin{itemize}
+    \item Interface \texttt{eth0} obtained \nolinkurl{10.10.20.137/24} while \texttt{eth1} obtained \nolinkurl{10.10.10.22/24}.
+    \item To eliminate asymmetric routing drops, the kernel routing table was configured with a single primary default gateway:
+\begin{lstlisting}[language=bash]
+$ sudo ip route replace default via 10.10.10.1 dev eth1 metric 100
+\end{lstlisting}
+    This ensures all non-local outbound traffic, including HTTP responses to external clients, is returned through the DMZ gateway where DNAT state tables reside.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m3-instance-ip-route-terminal.png}
+\caption{In-guest network configuration (\texttt{ip addr}) and kernel routing table (\texttt{ip route}).}
+\label{fig:m3_ip_route}
+\end{figure}
+
+\noindent \textbf{End-to-End Service Delivery:}
+A lightweight HTTP server was initialized via \texttt{sudo busybox httpd -f -p 80 -v}. External client requests were initiated against \url{http://172.24.4.187}. Figure~\ref{fig:m3_busybox_logs} demonstrates active ingress connections being served, and Figure~\ref{fig:m3_browser_http} displays the browser successfully rendering the verification page.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m3-busybox-httpd-logs.png}
+\caption{BusyBox HTTP daemon access logs recording external client requests.}
+\label{fig:m3_busybox_logs}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m3-web-browser-http-verification.png}
+\caption{Web browser verification accessing the dual-homed HTTP server via Floating IP \texttt{172.24.4.187}.}
+\label{fig:m3_browser_http}
+\end{figure}

@@ -1,0 +1,49 @@
+\section{Nhật ký Sự cố Kỹ thuật \& Phân tích Nguyên nhân Gốc}
+
+Quá trình xây dựng và vận hành hạ tầng đám mây OpenStack là một chuỗi thực nghiệm phức tạp, đòi hỏi sự phối hợp chính xác giữa nhiều tầng dịch vụ từ ảo hóa phần cứng, nhân Linux cho đến các giao thức mạng phân tán. Trong quá trình thực hiện đồ án, nhóm chúng em đã trực tiếp đối mặt và chẩn đoán nhiều sự cố kỹ thuật điển hình. Dưới đây là nhật ký chi tiết về 4 sự cố tiêu biểu, quy trình phân tích nguyên nhân gốc rễ (Root Cause Analysis - RCA) và phương án khắc phục triệt để mà nhóm chúng em đã đúc kết được:
+
+\subsection{Sự cố 1: Lỗi HTTP 403 CSRF Forbidden trên Dashboard Horizon}
+\begin{itemize}
+    \item \textbf{Hiện tượng quan sát:} Khi nhóm chúng em truy cập giao diện quản trị Horizon từ xa thông qua đường hầm bảo mật HTTPS Reverse Proxy của NetBird (\url{https://openstack.net.selfhost.io.vn/dashboard}), trình duyệt lập tức bị từ chối truy cập với mã lỗi HTTP 403 Forbidden kèm thông báo: \textit{"CSRF verification failed. Request aborted."}
+    \item \textbf{Phân tích nguyên nhân gốc:} Kể từ phiên bản Django 4.0 trở lên, cơ chế bảo vệ chống tấn công Cross-Site Request Forgery (CSRF) yêu cầu nghiêm ngặt tiêu đề HTTP \texttt{Origin} hoặc \texttt{Referer} của yêu cầu gửi đến phải khớp chính xác với danh sách định danh trong biến \texttt{CSRF\_TRUSTED\_ORIGINS}. Cấu hình mặc định của DevStack chỉ cho phép truy cập cục bộ qua \texttt{localhost} và địa chỉ IP trực tiếp của máy chủ vật lý (\texttt{192.168.2.10}), dẫn đến việc mọi yêu cầu đi qua tên miền proxy bên ngoài đều bị chặn lại.
+    \item \textbf{Giải pháp khắc phục:} Nhóm chúng em đã tiến hành bổ sung tên miền NetBird kèm cả hai giao thức (\texttt{https://} và \texttt{http://}) vào tệp cấu hình \nolinkurl{/etc/openstack-dashboard/local_settings.py}, sau đó khởi động lại dịch vụ web server Apache:
+\begin{lstlisting}[language=python]
+CSRF_TRUSTED_ORIGINS = [
+    'https://openstack.net.selfhost.io.vn',
+    'http://openstack.net.selfhost.io.vn',
+    'http://192.168.2.10'
+]
+\end{lstlisting}
+\end{itemize}
+
+\subsection{Sự cố 2: Rớt gói tin do Định tuyến Bất đối xứng trên Máy ảo Dual-NIC}
+\begin{itemize}
+    \item \textbf{Hiện tượng quan sát:} Sau khi gán địa chỉ Floating IP \texttt{172.24.4.187} vào cổng DMZ của máy ảo 2 card mạng (\texttt{module3-web-sever}), nhóm chúng em nhận thấy máy khách ngoài Internet có thể gửi lệnh ICMP Ping thành công nhưng mọi kết nối HTTP GET trên cổng 80 đều bị treo (timeout) và không thể tải được trang web.
+    \item \textbf{Phân tích nguyên nhân gốc:} Do máy ảo được cấp phát 2 card mạng (\texttt{eth0} thuộc mạng Private và \texttt{eth1} thuộc mạng DMZ), tiến trình DHCP client trong hệ điều hành máy ảo tự động tạo ra 2 tuyến đường mặc định (Default Gateway) có cùng mức ưu tiên (metric). Khi máy khách gửi gói tin TCP SYN vào cổng DMZ (\texttt{eth1}), máy chủ phản hồi gói TCP SYN-ACK nhưng kernel lại đẩy gói tin ra qua cổng \texttt{eth0} theo bảng định tuyến mặc định. Vì gói tin chiều ra đi vòng qua cổng Private thay vì cổng DMZ (nơi Router L3 đang duy trì bảng theo dõi trạng thái phiên kết nối Netfilter Conntrack/DNAT), Router L3 đã chủ động hủy bỏ gói tin do vi phạm tính đối xứng trạng thái (Asymmetric Routing Drop).
+    \item \textbf{Giải pháp khắc phục:} Nhóm chúng em đã can thiệp trực tiếp vào bảng định tuyến nhân Linux của máy ảo, xóa tuyến đường mặc định trên \texttt{eth0} và thiết lập tuyến đường qua cổng DMZ (\texttt{eth1}) có mức ưu tiên cao nhất:
+\begin{lstlisting}[language=bash]
+$ sudo ip route replace default via 10.10.10.1 dev eth1 metric 100
+$ sudo ip route del default via 10.10.20.1 dev eth0
+\end{lstlisting}
+\end{itemize}
+
+\subsection{Sự cố 3: Máy ảo không thể kết nối tới Swift API từ Subnet Private}
+\begin{itemize}
+    \item \textbf{Hiện tượng quan sát:} Khi thực hiện kịch bản tải mã nguồn từ Swift về máy ảo nằm trong phân đoạn mạng nội bộ, tiến trình \texttt{wget} liên tục báo lỗi \textit{"Connection refused"} hoặc timeout khi cố gắng kết nối tới cổng 8080.
+    \item \textbf{Phân tích nguyên nhân gốc:} Dịch vụ Swift Proxy được DevStack cấu hình lắng nghe trên địa chỉ IP của card mạng quản trị máy chủ vật lý (\texttt{192.168.2.10:8080}). Do máy ảo nằm trong subnet cô lập không có đường nối trực tiếp tới dải mạng quản trị của host, các gói tin yêu cầu bị mắc kẹt tại router ảo do thiếu cờ chuyển tiếp gói tin (IP Forwarding) trên hệ điều hành host và thiếu tuyến Gateway ngoại vi thích hợp trên L3 Router.
+    \item \textbf{Giải pháp khắc phục:} Nhóm chúng em đã kích hoạt cờ \texttt{net.ipv4.ip\_forward=1} trên máy chủ vật lý, đồng thời cấu hình định tuyến thông qua Gateway ngoại vi của Neutron Router để cho phép máy ảo gửi gói tin trực tiếp tới endpoint Swift của host.
+\end{itemize}
+
+\subsection{Sự cố 4: Race Condition khi Đính kèm Ổ đĩa VirtIO trong Cloud-Init}
+\begin{itemize}
+    \item \textbf{Hiện tượng quan sát:} Trong các lần thực thi tự động hóa với OpenStack Heat, nhóm chúng em ghi nhận xác suất ngẫu nhiên stack gặp lỗi khởi tạo hoặc dịch vụ web không hoạt động. Kiểm tra nhật ký \texttt{/var/log/cloud-init-output.log} cho thấy lệnh \texttt{mkfs.ext4 /dev/vdb} bị gián đoạn với thông báo: \textit{"Device does not exist"}.
+    \item \textbf{Phân tích nguyên nhân gốc:} Đây là hiện tượng tương tranh thời gian (Race Condition) kinh điển giữa tiến trình ảo hóa tính toán và lưu trữ: máy ảo Nova khởi động cực nhanh và Cloud-Init thực thi script \texttt{user\_data} gần như tức thì, trong khi tiến trình Cinder/QEMU gửi lệnh hot-plug ổ đĩa ảo qua socket điều khiển có độ trễ nhất định. Tại thời điểm script gọi lệnh format, kernel Linux chưa kịp nạp driver \texttt{virtio\_blk} cho thiết bị \texttt{/dev/vdb}.
+    \item \textbf{Giải pháp khắc phục:} Nhóm chúng em đã tái cấu trúc đoạn mã khởi tạo trong Cloud-Init, bổ sung một vòng lặp chủ động thăm dò (polling loop) kiểm tra sự hiện diện của thiết bị khối kèm cơ chế kiểm tra idempotent với \texttt{blkid} trước khi tiến hành định dạng:
+\begin{lstlisting}[language=bash]
+for i in {1..30}; do
+    [ -b /dev/vdb ] && break
+    sleep 2
+done
+blkid /dev/vdb || mkfs.ext4 /dev/vdb
+\end{lstlisting}
+\end{itemize}

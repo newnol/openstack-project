@@ -1,0 +1,135 @@
+\section{Module 1: Horizon Dashboard \& Core Services Lifecycle}
+
+\subsection{Objective \& Exploration}
+Module 1 verifies the initial operational state of the deployed OpenStack platform. It establishes baseline functionality across compute, storage, and networking layers through both the Horizon graphical user interface and the OpenStack unified CLI.
+
+\subsection{Core Services Inspection}
+Upon authentication to the Horizon dashboard under the \texttt{demo} project context, all core resource catalogs were inspected:
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.49\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/m1-compute-resource-overview.png}
+    \caption{Horizon Compute Overview and quotas.}
+    \label{fig:m1_overview}
+\end{minipage}\hfill
+\begin{minipage}{0.49\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/m1-glance-image-catalog.png}
+    \caption{Glance cloud base image repository.}
+    \label{fig:m1_glance_images}
+\end{minipage}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Compute Overview (Figure~\ref{fig:m1_overview}):} Validated project quota limits (10 Instances, 20 vCPUs, 50 GiB RAM, 1000 GiB Volume Storage, and 50 Floating IPs).
+    \item \textbf{Image Catalog (Figure~\ref{fig:m1_glance_images}):} Glance registered two base images: lightweight \nolinkurl{cirros-0.6.3-x86_64-disk} (20.69 MB) for rapid diagnostic testing and \nolinkurl{Fedora-Cloud-Base-37-1.7} (470 MB) for full Linux workloads.
+    \item \textbf{Network Infrastructure (Figure~\ref{fig:m1_networks}):} Default DevStack networking was verified, including internal tenant networks (\texttt{private}, \texttt{shared}, \texttt{heat-net}) and external provider network (\texttt{public}).
+    \item \textbf{Subnet Addressing (Figure~\ref{fig:m1_subnets}):} Detailed inspection of \texttt{private-net} verified dual-stack IPv4 (\nolinkurl{10.0.0.0/26}) and IPv6 (\nolinkurl{fd52:aee0:36f2::/64}) configuration.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.49\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/m1-neutron-networks-list.png}
+    \caption{Neutron virtual network inventory.}
+    \label{fig:m1_networks}
+\end{minipage}\hfill
+\begin{minipage}{0.49\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/m1-neutron-subnets-detail.png}
+    \caption{Dual-stack subnet configuration.}
+    \label{fig:m1_subnets}
+\end{minipage}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{L3 Virtual Routers (Figure~\ref{fig:m1_routers}):} The default virtual router \texttt{router1} was verified in \texttt{Active} state with its uplink gateway bound to \texttt{public}.
+    \item \textbf{Security Groups (Figure~\ref{fig:m1_secgroups}):} Inspected the initial \texttt{default} security group rules prior to custom tenant workload provisioning.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.49\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/m1-neutron-router-overview.png}
+    \caption{L3 virtual router \texttt{router1} on \texttt{public}.}
+    \label{fig:m1_routers}
+\end{minipage}\hfill
+\begin{minipage}{0.49\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/m1-neutron-security-groups.png}
+    \caption{Neutron security groups table.}
+    \label{fig:m1_secgroups}
+\end{minipage}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Key Pairs \& Heat Stacks (Figures~\ref{fig:m1_keypairs} and~\ref{fig:m1_heat_stacks}):} Inspected the key pair catalog and Heat Orchestration Stacks dashboard prior to stack deployment.
+    \item \textbf{Swift Containers (Figure~\ref{fig:m1_swift_containers}):} Verified that Swift Object Storage console was initialized with zero pre-existing user containers.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.49\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/m1-nova-keypairs-list.png}
+    \caption{Key pair management panel.}
+    \label{fig:m1_keypairs}
+\end{minipage}\hfill
+\begin{minipage}{0.49\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/m1-heat-stacks-initial.png}
+    \caption{Heat Orchestration Stacks console.}
+    \label{fig:m1_heat_stacks}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m1-swift-containers-initial.png}
+\caption{Swift Object Storage container console before bucket initialization.}
+\label{fig:m1_swift_containers}
+\end{figure}
+
+\subsection{Instance Lifecycle: Launch, Verification, and Deprovisioning}
+To validate end-to-end VM scheduling, an ephemeral instance named \nolinkurl{module1-horizon-instance} was launched via the Horizon multi-step wizard (Figure~\ref{fig:m1_launch_dialog}):
+\begin{itemize}
+    \item \textbf{Parameters:} Flavor \texttt{m1.nano} (1 vCPU, 64 MB RAM, 1 GB Disk), Source \nolinkurl{cirros-0.6.3-x86_64-disk}, Network \texttt{private}.
+    \item \textbf{Runtime Verification (Figure~\ref{fig:m1_instance_active}):} The instance attained \texttt{Active} status with power state \texttt{Running}, obtaining internal IP addresses \texttt{10.0.0.45} (IPv4) and \nolinkurl{fd52:aee0:36f2:0:f816:3eff:fed0:3caa} (IPv6).
+    \item \textbf{Deprovisioning Flow (Figures~\ref{fig:m1_delete_confirmation} and~\ref{fig:m1_instances_empty}):} The instance was terminated through the confirmation modal. The instance inventory returned to an empty state, confirming successful reclamation of compute quotas and virtual ports.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.49\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/m1-instance-launch-wizard.png}
+    \caption{Instance provisioning wizard.}
+    \label{fig:m1_launch_dialog}
+\end{minipage}\hfill
+\begin{minipage}{0.49\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/m1-instance-active-status.png}
+    \caption{Active instance in Nova inventory.}
+    \label{fig:m1_instance_active}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.49\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/m1-instance-delete-confirmation.png}
+    \caption{Deprovisioning confirmation modal.}
+    \label{fig:m1_delete_confirmation}
+\end{minipage}\hfill
+\begin{minipage}{0.49\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/m1-instance-terminated-empty.png}
+    \caption{Empty inventory post-termination.}
+    \label{fig:m1_instances_empty}
+\end{minipage}
+\end{figure}

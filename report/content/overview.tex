@@ -1,0 +1,56 @@
+\section{Tổng quan \& Thông số Môi trường Thực nghiệm}
+
+\subsection{Mục tiêu \& Phạm vi Đồ án}
+Trong khuôn khổ đồ án môn học, nhóm chúng em tập trung triển khai và vận hành một hệ thống hạ tầng đám mây riêng (Private Cloud) hoàn chỉnh dựa trên nền tảng mã nguồn mở OpenStack thông qua công cụ tự động hóa DevStack. Mục tiêu cốt lõi của nhóm là trực tiếp khảo sát, thực hành và làm chủ các nguyên lý kỹ thuật hạ tầng đám mây (Cloud Engineering), bao gồm mô hình Hạ tầng dưới dạng Dịch vụ (IaaS), công nghệ mạng ảo hóa điều khiển bằng phần mềm (SDN), quản lý vòng đời lưu trữ khối/đối tượng và tự động hóa điều phối hạ tầng dưới dạng mã (IaC).
+
+Quá trình thực nghiệm của nhóm được chia thành 5 phân hệ kỹ thuật (Module) cụ thể:
+\begin{itemize}
+    \item \textbf{Dịch vụ cốt lõi \& Quản lý vòng đời (Module 1):} Khảo sát, kiểm thử và vận hành các dịch vụ OpenStack thông qua giao diện Web Horizon và công cụ dòng lệnh OpenStack CLI.
+    \item \textbf{Phân đoạn \& Cô lập mạng Tenant (Module 2):} Xây dựng cấu trúc mạng đa tầng phân lập gồm mạng ngoại vi (Provider Network), vùng mạng DMZ, mạng nội bộ Private và bộ định tuyến ảo L3 Router.
+    \item \textbf{Máy ảo đa Card mạng \& Cung cấp dịch vụ (Module 3):} Khởi tạo máy ảo gắn đồng thời 2 card mạng (Dual-NIC), xử lý triệt để bài toán định tuyến bất đối xứng (Asymmetric Routing) trong nhân Linux, gán Floating IP và triển khai dịch vụ web công khai.
+    \item \textbf{Lưu trữ Bền vững \& Phục hồi sau thảm họa (Module 4):} Quản trị tài nguyên tĩnh phi cấu trúc bằng Swift Object Storage và ổ đĩa khối bền vững với Cinder Block Storage; thực hiện quy trình tạo Snapshot và khôi phục dữ liệu nguyên vẹn trên máy ảo độc lập.
+    \item \textbf{Tự động hóa Khai báo Hạ tầng với Heat (Module 5):} Soạn thảo mẫu điều phối Heat Orchestration Template (HOT) kết hợp kịch bản Cloud-Init để tự động hóa toàn bộ vòng đời từ cấp phát hạ tầng đến khởi chạy ứng dụng web.
+\end{itemize}
+
+\subsection{Môi trường Thực nghiệm Lab}
+Để phục vụ quá trình thực nghiệm, nhóm chúng em triển khai hệ thống OpenStack theo mô hình All-in-One trên một máy ảo chạy trong môi trường ảo hóa lồng nhau (Nested KVM) thuộc máy chủ Proxmox VE. Thông số cấu hình chi tiết được tổng hợp tại Bảng~\ref{tab:env_specs}.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{9.2cm}|}
+\hline
+\textbf{Thông số} & \textbf{Cấu hình / Giá trị thực tế} \\ \hline
+Nền tảng ảo hóa & Proxmox VE (Nested Hardware Virtualization KVM)~\cite{kvm_paper} \\ \hline
+Hệ điều hành Host & Ubuntu Server 24.04.4 LTS (\texttt{noble}), Linux Kernel 6.8 \\ \hline
+Tài nguyên phần cứng & 4 vCPUs, 22 GiB RAM, 73 GiB NVMe Root Disk, 8 GiB Swap \\ \hline
+Nhánh DevStack & \nolinkurl{stable/2026.1} (Commit: \nolinkurl{da2f4d73f5ad74fc8ecfbe15bd7e20f6b0982dbb}) \\ \hline
+Kiểu ảo hóa Hypervisor & \texttt{LIBVIRT\_TYPE=kvm} (Tăng tốc phần cứng QEMU/KVM) \\ \hline
+Dịch vụ mở rộng kích hoạt & Heat Orchestration, Heat Dashboard, Swift Object Storage \\ \hline
+IP Host / Cổng kết nối & \texttt{192.168.2.10} / NetBird Overlay Mesh VPN Gateway \\ \hline
+Giao diện quản trị Web & \url{https://openstack.net.selfhost.io.vn/dashboard} \\ \hline
+\end{tabular}
+\caption{Thông số môi trường máy chủ và cấu hình triển khai DevStack.}
+\label{tab:env_specs}
+\end{table}
+
+\noindent \textbf{Giải trình kỹ thuật về phiên bản Hệ điều hành:} Mặc dù tài liệu đề bài ban đầu gợi ý Ubuntu 22.04 LTS, nhóm chúng em quyết định lựa chọn nền tảng Ubuntu 24.04.4 LTS (\texttt{noble}). Quyết định này bắt nguồn từ yêu cầu kỹ thuật thực tế của nhánh DevStack chính thức mới nhất (\nolinkurl{stable/2026.1}), vốn đòi hỏi môi trường Python 3.12 và các gói thư viện OpenStack phụ thuộc chỉ được hỗ trợ toàn diện trên phiên bản Ubuntu 24.04.
+
+\subsection{Phân công Trách nhiệm \& Quy tắc Cô lập Tài nguyên}
+Để đảm bảo quá trình thực hành nhóm diễn ra nhịp nhàng, tránh xung đột tài nguyên trên máy chủ DevStack All-in-One dùng chung, nhóm chúng em đã thống nhất bảng phân công nhiệm vụ cụ thể (Bảng~\ref{tab:team_assignment}) cùng các quy tắc vận hành chặt chẽ.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\linewidth}{|l|l|>{\raggedright\arraybackslash}X|c|}
+\hline
+\textbf{Thành viên} & \textbf{Vai trò} & \textbf{Nhiệm vụ Phụ trách} & \textbf{Đóng góp} \\ \hline
+Họ và Tên SV 1 & Trưởng nhóm & & 100\% \\ \hline
+Họ và Tên SV 2 & Thành viên & & 100\% \\ \hline
+Họ và Tên SV 3 & Thành viên & & 100\% \\ \hline
+\end{tabularx}
+\caption{Bảng phân công trách nhiệm và tỷ lệ đóng góp của các thành viên trong nhóm.}
+\label{tab:team_assignment}
+\end{table}
+
+\noindent \textbf{Quy tắc đặt tên tài nguyên (Naming Conventions):} Các thành viên trong nhóm thống nhất bắt buộc sử dụng tiền tố theo từng module (ví dụ: \texttt{m2-dmz-net}, \texttt{m3-web-server}, \texttt{m4-data-volume}, \texttt{m5-server}). Quy tắc này giúp ngăn ngừa triệt để việc ghi đè cấu hình và giúp quá trình nghiệm thu, dọn dẹp tài nguyên diễn ra độc lập mà không ảnh hưởng đến phần việc của nhau.

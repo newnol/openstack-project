@@ -1,0 +1,52 @@
+<mxfile host="app.diagrams.net" modified="2026-08-23T08:50:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
+  <diagram id="openstack-topo" name="Network Topology Architecture">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- External Network -->
+        <mxCell id="ext_net" value="&lt;b&gt;External Provider Network: public&lt;/b&gt;&lt;br&gt;Subnet: 172.24.4.0/24 (Gateway: 172.24.4.1) | Floating IP Pool: 172.24.4.187" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="100" y="30" width="940" height="65" as="geometry" />
+        </mxCell>
+        
+        <!-- Virtual Router -->
+        <mxCell id="router" value="&lt;b&gt;L3 Virtual Router: m2-router&lt;/b&gt;&lt;br&gt;External Uplink Gateway: 172.24.4.x (SNAT / DNAT Engine)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="380" y="140" width="380" height="65" as="geometry" />
+        </mxCell>
+        
+        <!-- DMZ Network -->
+        <mxCell id="dmz_net" value="&lt;b&gt;DMZ Network: m2-dmz-net&lt;/b&gt;&lt;br&gt;Subnet CIDR: 10.10.10.0/24&lt;br&gt;Router Interface: &lt;b&gt;10.10.10.1&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="100" y="255" width="430" height="75" as="geometry" />
+        </mxCell>
+        
+        <!-- Private Network -->
+        <mxCell id="priv_net" value="&lt;b&gt;Private Network: m2-private-net&lt;/b&gt;&lt;br&gt;Subnet CIDR: 10.10.20.0/24&lt;br&gt;Router Interface: &lt;b&gt;10.10.20.1&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="610" y="255" width="430" height="75" as="geometry" />
+        </mxCell>
+        
+        <!-- Dual-Homed Web Server -->
+        <mxCell id="web_vm" value="&lt;b&gt;Dual-Homed Compute Instance: module3-web-sever&lt;/b&gt;&lt;br&gt;&lt;hr&gt;• &lt;b&gt;NIC 1 (eth1 - DMZ):&lt;/b&gt; Fixed IP &lt;b&gt;10.10.10.22&lt;/b&gt; &amp;harr; Floating IP &lt;b&gt;172.24.4.187&lt;/b&gt; (Default Gateway: 10.10.10.1, Metric: 100)&lt;br&gt;• &lt;b&gt;NIC 2 (eth0 - Private):&lt;/b&gt; Fixed IP &lt;b&gt;10.10.20.137&lt;/b&gt; (Internal Tenant Communication)&lt;br&gt;• &lt;b&gt;Persistent Block Storage:&lt;/b&gt; Cinder Volume &lt;b&gt;/dev/vdc&lt;/b&gt; (1 GiB, ext4, mounted at /mnt/data)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="210" y="385" width="720" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Connectors -->
+        <mxCell id="edge1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="router" target="ext_net">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="router" target="dmz_net">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="router" target="priv_net">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="web_vm" target="dmz_net">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeWidth=2;" edge="1" parent="1" source="web_vm" target="priv_net">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

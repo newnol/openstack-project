@@ -1,0 +1,76 @@
+\section{Module 2: Multi-Tier Tenant Network Isolation}
+
+\subsection{Objective \& Design Rationale}
+Module 2 establishes a dual-tier virtual network architecture to provide logical isolation between public-facing application components and sensitive backend services. By leveraging Neutron Software-Defined Networking (SDN), distinct broadcast domains and granular layer-3 routing policies were configured without physical re-cabling.
+
+\subsection{Implementation Steps}
+The network topology was provisioned using the following automated configuration workflow:
+
+\begin{enumerate}
+    \item \textbf{DMZ Network \& Subnet Creation:}
+    \begin{itemize}
+        \item Network Name: \texttt{m2-dmz-net} (\texttt{module2-dmz-net})
+        \item Subnet CIDR: \texttt{10.10.10.0/24}, Gateway IP: \texttt{10.10.10.1}, DNS: \texttt{8.8.8.8}
+    \end{itemize}
+    \item \textbf{Private Internal Network \& Subnet Creation:}
+    \begin{itemize}
+        \item Network Name: \texttt{m2-private-net} (\texttt{module2-private-net})
+        \item Subnet CIDR: \texttt{10.10.20.0/24}, Gateway IP: \texttt{10.10.20.1}, DNS: \texttt{8.8.8.8}
+    \end{itemize}
+    \item \textbf{L3 Router Deployment \& Uplink Gateway Configuration:}
+    \begin{itemize}
+        \item Router Name: \texttt{m2-router} (\texttt{module2-router})
+        \item External Gateway: Attached to external provider network \texttt{public} to enable Source Network Address Translation (SNAT) and Floating IP routing.
+    \end{itemize}
+    \item \textbf{Subnet Interface Attachment:}
+    Attached both \texttt{m2-dmz-subnet} and \texttt{m2-private-subnet} to \texttt{m2-router}, establishing inter-subnet routing capabilities while preserving distinct network boundaries.
+\end{enumerate}
+
+\subsection{Verification \& Topology Analysis}
+The provisioned networking components were validated through Horizon and the CLI:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m2-network-list.png}
+\caption{Neutron network inventory detailing newly created DMZ and Private subnets.}
+\label{fig:m2_networks}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Subnet Inventory (Figure~\ref{fig:m2_networks}):} Both tenant subnets (\nolinkurl{10.10.10.0/24} and \nolinkurl{10.10.20.0/24}) are registered and active.
+    \item \textbf{External Router Gateway (Figure~\ref{fig:m2_router_overview}):} Verified that \texttt{module2-router} possesses an active external gateway interface connected to network \texttt{public}.
+    \item \textbf{Router Interfaces (Figure~\ref{fig:m2_router_interfaces}):} Confirmed that \texttt{module2-router} holds two internal active ports serving as default gateways for the DMZ (\texttt{10.10.10.1}) and Private (\texttt{10.10.20.1}) subnets.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m2-router-external-gateway.png}
+\caption{Virtual router \texttt{module2-router} configured with uplink to external provider network \texttt{public}.}
+\label{fig:m2_router_overview}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m2-router-internal-interfaces.png}
+\caption{Internal gateway interfaces (\texttt{10.10.10.1} and \texttt{10.10.20.1}) bound to \texttt{module2-router}.}
+\label{fig:m2_router_interfaces}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Network Ports (Figure~\ref{fig:m2_ports}):} Verified virtual port allocations, including DHCP agent ports and router gateway endpoints.
+    \item \textbf{Horizon Topology Graph (Figure~\ref{fig:m2_topology_diagram}):} The interactive topology visualization displays the multi-tier segmentation: external traffic enters through \texttt{public}, traverses \texttt{m2-router}, and fans out to the DMZ (red) and Private (green) networks.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m2-ports-list.png}
+\caption{Port bindings on \texttt{m2-private-net} showing router and DHCP endpoints.}
+\label{fig:m2_ports}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\linewidth]{img/m2-network-topology-diagram.png}
+\caption{Horizon topology graph illustrating segmented L3 routing architecture.}
+\label{fig:m2_topology_diagram}
+\end{figure}

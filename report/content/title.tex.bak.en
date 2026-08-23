@@ -1,0 +1,35 @@
+\begin{titlepage}
+\begin{center}
+
+\textbf{\large VIETNAM NATIONAL UNIVERSITY HO CHI MINH CITY}\\[0.2cm]
+\textbf{\large UNIVERSITY OF SCIENCE}\\[0.2cm]
+\textbf{\large FACULTY OF INFORMATION TECHNOLOGY}\\[0.3cm]
+
+\vspace{0.4cm}
+\includegraphics[width=2.6cm]{img/hcmus-logo.png}
+\vspace{0.6cm}
+
+\rule{\textwidth}{1.2pt} \\[0.4cm]
+{\huge \textbf{\textsc{\reporttitle}}} \\[0.3cm]
+{\large \textbf{Course: \reportname}} \\[0.2cm]
+\rule{\textwidth}{1.2pt} \\[0.8cm]
+
+\begin{minipage}[t]{0.48\textwidth}
+\begin{flushleft} \large
+\emph{Students:}\\
+\studentname
+\end{flushleft}
+\end{minipage}
+~
+\begin{minipage}[t]{0.48\textwidth}
+\begin{flushleft} \large
+\emph{Instructors:}\\
+\teachername
+\end{flushleft}
+\end{minipage}
+
+\vfill
+{\large \textbf{Ho Chi Minh City, August 2026}}
+
+\end{center}
+\end{titlepage}

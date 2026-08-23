@@ -1,0 +1,42 @@
+<mxfile host="app.diagrams.net" modified="2026-08-23T08:50:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
+  <diagram id="routing-flow" name="Symmetric Traffic Routing Flow">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- External Client -->
+        <mxCell id="client" value="&lt;b&gt;External Client Browser&lt;/b&gt;&lt;br&gt;IP: 172.24.4.1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="60" y="100" width="220" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Neutron L3 Router -->
+        <mxCell id="router" value="&lt;b&gt;Neutron L3 Virtual Router (m2-router)&lt;/b&gt;&lt;br&gt;DNAT Translation: &lt;b&gt;172.24.4.187&lt;/b&gt; &amp;rarr; &lt;b&gt;10.10.10.22&lt;/b&gt;&lt;br&gt;&lt;i&gt;Maintains Ingress Connection Tracking State&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="400" y="75" width="340" height="110" as="geometry" />
+        </mxCell>
+        
+        <!-- Dual-Homed Instance -->
+        <mxCell id="vm" value="&lt;b&gt;Dual-Homed Compute Instance (module3-web-sever)&lt;/b&gt;&lt;br&gt;&lt;hr&gt;• &lt;b&gt;eth1 (DMZ):&lt;/b&gt; IP 10.10.10.22 | Default Route: &lt;b&gt;10.10.10.1 (metric 100)&lt;/b&gt;&lt;br&gt;• &lt;b&gt;eth0 (Private):&lt;/b&gt; IP 10.10.20.137 | Local Subnet Route Only" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="400" y="270" width="340" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- Flow Arrows -->
+        <mxCell id="arr1" value="1. HTTP Request (GET :80) to FIP 172.24.4.187" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#274e13;fontColor=#274e13;fontSize=11;" edge="1" parent="1" source="client" target="router">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arr2" value="2. Forward to eth1 (10.10.10.22)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.35;exitY=1;exitDx=0;exitDy=0;entryX=0.35;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#274e13;fontColor=#274e13;fontSize=11;" edge="1" parent="1" source="router" target="vm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arr3" value="3. HTTP Reply exits eth1 via DMZ Gateway (Symmetric Path)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.65;exitY=0;exitDx=0;exitDy=0;entryX=0.65;entryY=1;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#0b5394;fontColor=#0b5394;dashed=1;fontSize=11;" edge="1" parent="1" source="vm" target="router">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="arr4" value="4. Return HTTP Response (200 OK)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#0b5394;fontColor=#0b5394;dashed=1;fontSize=11;" edge="1" parent="1" source="router" target="client">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

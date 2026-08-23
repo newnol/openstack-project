@@ -1,0 +1,46 @@
+\section{Overview \& Environment Specifications}
+
+\subsection{Project Scope \& Objectives}
+This project implements a complete private cloud infrastructure using the OpenStack open-source cloud operating system deployed via DevStack. The primary objective is to gain hands-on operational and architectural understanding of cloud engineering, spanning Infrastructure-as-a-Service (IaaS) principles, software-defined networking (SDN), distributed storage lifecycle management, and automated Infrastructure-as-Code (IaC) orchestration.
+
+The core deliverables and technical milestones include:
+\begin{itemize}
+    \item \textbf{Core Services \& Lifecycle Management (Module 1):} Verification and operational testing of OpenStack services via the Horizon Web Dashboard and OpenStack unified CLI.
+    \item \textbf{Tenant Network Isolation \& Routing (Module 2):} Constructing a segmented multi-tier network topology comprising an external provider network, a DMZ network, an internal private network, and an L3 virtual router.
+    \item \textbf{Dual-Homed Compute \& Service Delivery (Module 3):} Provisioning a multi-NIC compute instance, resolving in-guest asymmetric kernel routing, binding Floating IPs, and exposing a public HTTP service.
+    \item \textbf{Persistent Storage \& Disaster Recovery (Module 4):} Managing unstructured static application artifacts via Swift Object Storage and persistent block volumes via Cinder, followed by snapshotting and point-in-time recovery verification.
+    \item \textbf{Declarative Orchestration with Heat (Module 5):} Authoring Heat Orchestration Templates (HOT) and leveraging Cloud-Init to automatically provision the entire stack from raw infrastructure up to the running web application.
+\end{itemize}
+
+\subsection{Experimental Lab Environment}
+The private cloud environment was deployed as a single-node all-in-one DevStack instance hosted within a Proxmox VE hypervisor utilizing nested KVM virtualization~\cite{kvm_paper}. The detailed host configuration is documented in Table~\ref{tab:env_specs}.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{9.2cm}|}
+\hline
+\textbf{Parameter} & \textbf{Specification / Value} \\ \hline
+Hypervisor Host & Proxmox VE (Nested Hardware Virtualization KVM) \\ \hline
+Operating System & Ubuntu Server 24.04.4 LTS (\texttt{noble}), Linux Kernel 6.8 \\ \hline
+Compute Capacity & 4 vCPUs, 22 GiB RAM, 73 GiB NVMe Root Disk, 8 GiB Swap \\ \hline
+DevStack Branch & \nolinkurl{stable/2026.1} (Commit: \nolinkurl{da2f4d73f5ad74fc8ecfbe15bd7e20f6b0982dbb}) \\ \hline
+Virtualization Type & \texttt{LIBVIRT\_TYPE=kvm} (QEMU/KVM accelerated) \\ \hline
+Enabled Optional Services & Heat Orchestration, Heat Dashboard, Swift Object Storage \\ \hline
+External Gateway / Host IP & \texttt{192.168.2.10} / NetBird Overlay Mesh VPN Gateway \\ \hline
+Web Management UI & \url{https://openstack.net.selfhost.io.vn/dashboard} \\ \hline
+\end{tabular}
+\caption{Host environment and DevStack deployment specifications.}
+\label{tab:env_specs}
+\end{table}
+
+\noindent \textbf{Engineering Disclosure on OS Version:} Although the preliminary course specification references Ubuntu 22.04 LTS, our deployment utilized Ubuntu 24.04.4 LTS (\texttt{noble}). This decision was mandated by the active DevStack release branch (\nolinkurl{stable/2026.1}), which requires Python 3.12 and modern OpenStack package dependencies natively supported on Ubuntu 24.04.
+
+\subsection{Team Organization \& Resource Isolation Rules}
+To ensure collaborative development without resource collision on a shared all-in-one controller, the team enforced strict operational boundaries:
+\begin{itemize}
+    \item \textbf{Infra \& Integration Lead:} Hypervisor maintenance, DevStack base deployment, Module 1 verification, and final report compilation.
+    \item \textbf{Network \& Compute Lead:} Modules 2 and 3 implementation, SDN topology, security group definitions, dual-NIC routing, and ingress traffic validation.
+    \item \textbf{Storage \& Automation Lead:} Modules 4 and 5 implementation, Swift bucket management, Cinder persistent volumes, snapshot recovery, and Heat template engineering.
+    \item \textbf{Resource Naming Conventions:} All resources strictly adopted module-specific prefixes (e.g., \texttt{m2-dmz-net}, \texttt{m3-web-server}, \texttt{m4-data-volume}, \texttt{m5-server}) to prevent accidental collisions and facilitate deterministic tear-down.
+\end{itemize}

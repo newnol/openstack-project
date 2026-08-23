@@ -1,0 +1,35 @@
+\section{System Architecture \& Network Topology}
+
+\subsection{OpenStack Architectural Layering}
+OpenStack operates as a modular, distributed platform where independent microservices communicate over RESTful HTTP APIs and RabbitMQ message queues, coordinated centrally by the Keystone identity service~\cite{openstack_arch, devstack_docs} (Figure~\ref{fig:sys_architecture}).
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{img/openstack_architecture.png}
+\caption{Modular architecture and service interaction flow of the deployed OpenStack platform.}
+\label{fig:sys_architecture}
+\end{figure}
+
+The architectural breakdown of individual functional blocks is defined as follows:
+\begin{enumerate}
+    \item \textbf{Control \& Identity (Keystone):} Authenticates API requests, generates scoped tokens, and resolves service endpoint URLs across administrative and internal networks.
+    \item \textbf{Compute Engine (Nova):} Interfaces with \texttt{libvirt/qemu} to manage virtual machine execution, hypervisor scheduling, and ephemeral root disk provisioning.
+    \item \textbf{Image Catalog (Glance):} Stores and serves immutable cloud-init compatible OS images (\texttt{cirros-0.6.3-x86\_64-disk} and \texttt{Fedora-Cloud-Base-37-1.7}).
+    \item \textbf{Network Virtualization (Neutron):} Manages Software-Defined Networking (SDN)~\cite{neutron_guide}, overlay tenant networks, virtual L3 routers, and distributed firewalls (Security Groups).
+    \item \textbf{Storage Subsystems (Cinder \& Swift):}
+    \begin{itemize}
+        \item \textbf{Cinder~\cite{cinder_storage}:} Manages block-level volume attachment over iSCSI/LVM for stateful persistence.
+        \item \textbf{Swift~\cite{swift_storage}:} Provides object storage via REST APIs for static assets and application source distribution.
+    \end{itemize}
+    \item \textbf{Orchestration Engine (Heat):} Parses declarative YAML templates (HOT specification)~\cite{heat_hot_guide} and computes Directed Acyclic Graphs (DAG) to execute dependency-ordered infrastructure provisioning.
+\end{enumerate}
+
+\subsection{Multi-Tier Network Architecture}
+Figure~\ref{fig:net_architecture} illustrates the logical network topology deployed throughout Modules 2, 3, and 4, modeling a secure enterprise network following RFC 1918~\cite{rfc1918}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{img/network_topology.png}
+\caption{Logical network topology showcasing multi-tier tenant isolation, L3 routing, and dual-homed instance connectivity.}
+\label{fig:net_architecture}
+\end{figure}

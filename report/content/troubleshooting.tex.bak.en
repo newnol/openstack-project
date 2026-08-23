@@ -1,0 +1,49 @@
+\section{Troubleshooting \& Incident Analysis}
+
+During the deployment and operational lifecycle, four notable engineering incidents occurred and were successfully resolved:
+
+\subsection{Incident 1: Horizon Dashboard CSRF Forbidden (HTTP 403)}
+\begin{itemize}
+    \item \textbf{Symptom:} Accessing Horizon through the NetBird HTTPS reverse proxy (\url{https://openstack.net.selfhost.io.vn/dashboard}) resulted in an immediate HTTP 403 Forbidden error: \textit{"CSRF verification failed. Request aborted."}
+    \item \textbf{Root Cause:} Django 4.0+ enforces strict HTTP \texttt{Origin} header validation against the \texttt{CSRF\_TRUSTED\_ORIGINS} setting. The default DevStack configuration only trusts localhost and direct controller IPs.
+    \item \textbf{Resolution:} Modified \nolinkurl{/etc/openstack-dashboard/local_settings.py} to trust the NetBird domain and restarted Apache:
+\begin{lstlisting}[language=python]
+CSRF_TRUSTED_ORIGINS = [
+    'https://openstack.net.selfhost.io.vn',
+    'http://openstack.net.selfhost.io.vn',
+    'http://192.168.2.10'
+]
+\end{lstlisting}
+\end{itemize}
+
+\subsection{Incident 2: Dual-NIC Asymmetric Ingress/Egress Packet Drops}
+\begin{itemize}
+    \item \textbf{Symptom:} Floating IP \texttt{172.24.4.187} responded to ICMP Ping from external clients, but HTTP GET requests timed out.
+    \item \textbf{Root Cause:} DHCP client in guest OS configured two default gateways. Egress TCP SYN-ACK packets exited via \texttt{eth0} (Private gateway), bypassing the DNAT connection-tracking table on \texttt{eth1} (DMZ gateway).
+    \item \textbf{Resolution:} Removed the Private default route and enforced a prioritized default gateway on the DMZ interface:
+\begin{lstlisting}[language=bash]
+$ sudo ip route replace default via 10.10.10.1 dev eth1 metric 100
+$ sudo ip route del default via 10.10.20.1 dev eth0
+\end{lstlisting}
+\end{itemize}
+
+\subsection{Incident 3: Swift Endpoint Reachability from Private Subnet}
+\begin{itemize}
+    \item \textbf{Symptom:} Guest VM failed to download source code from Swift API with \textit{"Connection refused"} on port 8080.
+    \item \textbf{Root Cause:} Swift proxy was bound to the management host interface (\texttt{192.168.2.10:8080}). The in-guest DNS resolver could not resolve the external host domain directly.
+    \item \textbf{Resolution:} Configured IP forwarding on the host and accessed the Swift endpoint via the L3 router external gateway.
+\end{itemize}
+
+\subsection{Incident 4: VirtIO Block Device Attachment Race in Cloud-Init}
+\begin{itemize}
+    \item \textbf{Symptom:} Heat automated deployment occasionally failed during \texttt{mkfs.ext4 /dev/vdb} with \textit{"Device does not exist"}.
+    \item \textbf{Root Cause:} Nova VM boot completed and executed \texttt{user\_data} before Cinder finished asynchronous volume hot-plugging via QEMU monitor.
+    \item \textbf{Resolution:} Implemented an active polling barrier in Cloud-Init before filesystem formatting:
+\begin{lstlisting}[language=bash]
+for i in {1..30}; do
+    [ -b /dev/vdb ] && break
+    sleep 2
+done
+blkid /dev/vdb || mkfs.ext4 /dev/vdb
+\end{lstlisting}
+\end{itemize}

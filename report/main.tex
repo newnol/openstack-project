@@ -1,0 +1,152 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage[T5]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{float}
+\usepackage{indentfirst}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{xurl}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=red,urlcolor=blue]{hyperref}
+\usepackage[top=.75in, left=.75in, right=.75in, bottom=1in]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{microtype}
+
+\makeindex
+
+% Paragraph Spacing, Indentation, and Overflow Protection
+\setlength{\parskip}{5pt}
+\setlength{\parindent}{0.6cm}
+\emergencystretch 3em
+\hfuzz=1pt
+\vfuzz=1pt
+
+% Line spacing 1.2
+\renewcommand{\baselinestretch}{1.2}
+
+% Code Listing Styling
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.97}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=none,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single,
+    rulecolor=\color{black!20}
+}
+\lstset{style=mystyle}
+
+% YAML language support for listings
+\lstdefinelanguage{yaml}{
+  keywords={true,false,null,y,n},
+  keywordstyle=\color{blue}\bfseries,
+  basicstyle=\ttfamily\footnotesize,
+  sensitive=false,
+  comment=[l]{\#},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{codegreen}\ttfamily,
+  stringstyle=\color{codepurple}\ttfamily,
+  moredelim=[l][\color{blue}]{\&},
+  moredelim=[l][\color{blue}]{*},
+  moredelim=**[il][\color{red}\bfseries{:}\ ]{: \ },
+  morestring=[b]',
+  morestring=[b]"
+}
+
+% Rename bibliography title to "Tài liệu tham khảo"
+\addto\captionsvietnamese{
+  \renewcommand{\refname}{Tài liệu tham khảo}
+  \renewcommand{\bibname}{Tài liệu tham khảo}
+}
+
+% Course and Report Metadata
+\newcommand{\reportname}{Triển khai và Vận hành Hạ tầng Điện toán Đám mây}
+\newcommand{\reporttitle}{Đồ án 2: Xây dựng Đám mây Riêng trên nền tảng OpenStack}
+
+\newcommand{\studentname}{
+    \textbf{Họ và Tên SV 1} -- \texttt{MSSV1} \\
+    \textbf{Họ và Tên SV 2} -- \texttt{MSSV2} \\
+    \textbf{Họ và Tên SV 3} -- \texttt{MSSV3} \\
+}
+
+\newcommand{\teachername}{
+    Cô Chung Thùy Linh\\
+    Thầy Lê Ngọc Sơn\\
+}
+
+% Header and Footer
+\setlength{\headheight}{29.5pt}
+\pagestyle{fancy}
+\fancyhead{}
+\lhead{\small \textbf{CSC11006} --- \reporttitle}
+\rhead{\small \thepage}
+\fancyfoot{}
+
+% Document Body
+\begin{document}
+
+\pagenumbering{alph}
+\input{content/title.tex}
+
+\newpage
+\pagenumbering{roman}
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+\input{content/overview.tex}
+\newpage
+
+\input{content/architecture.tex}
+\newpage
+
+\input{content/module1.tex}
+\newpage
+
+\input{content/module2.tex}
+\newpage
+
+\input{content/module3.tex}
+\newpage
+
+\input{content/module4.tex}
+\newpage
+
+\input{content/module5.tex}
+\newpage
+
+\input{content/troubleshooting.tex}
+\newpage
+
+\input{content/conclusion.tex}
+\newpage
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
