@@ -9,12 +9,13 @@ RECOVERY_SERVER="module4-recovery-server"
 IMAGE_NAME="Fedora-Cloud-Base-37-1.7.x86_64" # Using Fedora
 FLAVOR_NAME="m1.small"
 KEY_NAME="module3-key-pair"
-RECOVERY_NET="m2-dmz-net" # Changed to DMZ net so we can associate Floating IP
+RECOVERY_NET="module2-dmz-net"
+ORIGINAL_SERVER="module3-web-server"
 
 # NOTE: Before running this script, ensure you have run 'sync' and 'sudo umount /mnt/data' inside VM1!
 
-echo "-> Detaching original volume from VM1..."
-openstack server remove volume module3-web-sever $VOLUME_NAME
+echo "-> Detaching original volume from VM1 ($ORIGINAL_SERVER)..."
+openstack server remove volume $ORIGINAL_SERVER $VOLUME_NAME
 
 echo "-> Waiting for volume to become available after detach..."
 while [ "$(openstack volume show -f value -c status $VOLUME_NAME)" != "available" ]; do
@@ -42,6 +43,7 @@ openstack server create $RECOVERY_SERVER \
   --image $IMAGE_NAME \
   --flavor $FLAVOR_NAME \
   --key-name $KEY_NAME \
+  --config-drive true \
   --network $RECOVERY_NET
 
 echo "-> Waiting for server to become ACTIVE..."

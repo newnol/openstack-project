@@ -2,6 +2,7 @@
 set -eo pipefail
 
 DEVSTACK_DIR=${DEVSTACK_DIR:-$HOME/devstack}
+[[ -d "$DEVSTACK_DIR" ]] || DEVSTACK_DIR="/opt/stack/devstack"
 EVIDENCE_DIR=${EVIDENCE_DIR:-$HOME/openstack-project/module1/cli}
 SERVER_NAME=${SERVER_NAME:-module1-cli-instance}
 mkdir -p "$EVIDENCE_DIR"

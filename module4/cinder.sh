@@ -3,7 +3,7 @@ set -e
 
 echo "=== Module 4: Cinder Volume Setup ==="
 VOLUME_NAME="module4-data-volume"
-SERVER_NAME="module3-web-sever" # Correct actual server name (missing 'r')
+SERVER_NAME="module3-web-server"
 
 echo "-> Creating Cinder volume ($VOLUME_NAME)..."
 openstack volume create --size 1 $VOLUME_NAME

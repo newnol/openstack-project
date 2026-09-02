@@ -9,17 +9,17 @@ echo "=== Starting Module 2: Network Topology Setup ==="
 # 1. Define environment variables
 EXTERNAL_NET="public" # Name of the existing public network in DevStack
 
-DMZ_NET="m2-dmz-net"
-DMZ_SUBNET="m2-dmz-subnet"
+DMZ_NET="module2-dmz-net"
+DMZ_SUBNET="module2-dmz-subnet"
 DMZ_CIDR="10.10.10.0/24"
 DMZ_GW="10.10.10.1"
 
-PRIVATE_NET="m2-private-net"
-PRIVATE_SUBNET="m2-private-subnet"
+PRIVATE_NET="module2-private-net"
+PRIVATE_SUBNET="module2-private-subnet"
 PRIVATE_CIDR="10.10.20.0/24"
 PRIVATE_GW="10.10.20.1"
 
-ROUTER_NAME="m2-router"
+ROUTER_NAME="module2-router"
 
 # 2. Create DMZ Network & Subnet
 echo "-> Creating DMZ Network ($DMZ_NET)..."

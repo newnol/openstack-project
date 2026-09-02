@@ -27,12 +27,12 @@ resources:
   m5_dmz_net:
     type: OS::Neutron::Net
     properties:
-      name: m5-dmz-net
+      name: module5-dmz-net
 
   m5_dmz_subnet:
     type: OS::Neutron::Subnet
     properties:
-      name: m5-dmz-subnet
+      name: module5-dmz-subnet
       network: { get_resource: m5_dmz_net }
       cidr: 10.50.10.0/24
       dns_nameservers: [ 8.8.8.8, 1.1.1.1 ]
@@ -41,7 +41,7 @@ resources:
   m5_router:
     type: OS::Neutron::Router
     properties:
-      name: m5-router
+      name: module5-router
       external_gateway_info:
         network: { get_param: public_network }
 
@@ -55,7 +55,7 @@ resources:
   m5_web_sg:
     type: OS::Neutron::SecurityGroup
     properties:
-      name: m5-web-sg
+      name: module5-web-sg
       description: Allow SSH, HTTP, and ICMP
       rules:
         - protocol: icmp
@@ -87,17 +87,18 @@ resources:
   m5_data_volume:
     type: OS::Cinder::Volume
     properties:
-      name: m5-data-volume
+      name: module5-data-volume
       size: 1
 
   # 7. Compute Server with Cloud-Init
   m5_server:
     type: OS::Nova::Server
     properties:
-      name: m5-web-server
+      name: module5-web-server
       image: { get_param: image }
       flavor: { get_param: flavor }
       key_name: { get_param: key_name }
+      config_drive: true
       networks:
         - port: { get_resource: m5_web_port }
       user_data_format: RAW
